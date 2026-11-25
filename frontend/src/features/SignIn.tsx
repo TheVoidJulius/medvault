@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { ArrowRight, Lock } from 'lucide-react';
 import { Button, Input, Notice } from '../components/ui';
+import { Logo } from '../components/Logo';
 import { EcgTrace } from '../components/vitals';
 import { cx } from '../lib/format';
 import type { User } from '../lib/types';
@@ -41,13 +42,7 @@ export function SignIn({ onSignedIn }: { onSignedIn: (token: string, user: User)
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.15fr_1fr]">
       <section className="ecg-paper relative flex flex-col justify-between overflow-hidden border-b border-rule px-6 py-8 sm:px-12 lg:border-b-0 lg:border-r lg:py-12">
-        <div className="flex items-center gap-2.5">
-          <svg viewBox="0 0 32 32" className="h-8 w-8" aria-hidden>
-            <rect width="32" height="32" rx="8" fill="rgb(var(--ink))" />
-            <path d="M4 17h6l2-6 4 12 3-9 2 3h7" fill="none" stroke="rgb(var(--trace))" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="text-lg font-extrabold tracking-[-0.03em]">MedVault AI</span>
-        </div>
+        <Logo size="lg" />
 
         <div className="my-10 lg:my-0">
           <h1 className="max-w-xl text-[2.5rem] font-extrabold leading-[1.02] tracking-[-0.045em] sm:text-[3.5rem]">

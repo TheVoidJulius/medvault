@@ -1,5 +1,6 @@
 import { ReactNode, useState } from 'react';
 import { LayoutDashboard, LogOut, Menu, MessageSquareText, Moon, ScrollText, Search, Sun, UserPlus, Users, X } from 'lucide-react';
+import { Logo } from '../components/Logo';
 import { Button } from '../components/ui';
 import { cx, fullName } from '../lib/format';
 import type { PatientListItem, User } from '../lib/types';
@@ -38,13 +39,7 @@ function Rail({
   return (
     <div className="flex h-full flex-col bg-rail text-rail-ink">
       <div className="flex h-16 items-center justify-between px-5">
-        <span className="flex items-center gap-2.5">
-          <svg viewBox="0 0 32 32" className="h-7 w-7" aria-hidden>
-            <rect width="32" height="32" rx="8" fill="rgb(var(--rail-line))" />
-            <path d="M4 17h6l2-6 4 12 3-9 2 3h7" fill="none" stroke="#FF6B76" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span className="text-[0.9375rem] font-extrabold tracking-[-0.03em] text-white">MedVault AI</span>
-        </span>
+        <Logo onDark />
         {onClose && (
           <button type="button" onClick={onClose} aria-label="Close navigation" className="rounded-ctl p-1.5 hover:bg-white/10">
             <X className="h-4 w-4" />
