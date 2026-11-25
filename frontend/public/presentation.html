@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MedVault AI: Burgundy Clinical Medical Record Database</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* === VIEWPORT-BASE MANDATORY STAGE CSS === */
+      /* 1. Lock the browser viewport */
+      html,
+      body {
+          width: 100%;
+          height: 100%;
+          margin: 0;
+          overflow: hidden;
+          background: var(--stage-bg, #000);
+      }
+
+      /* 2. Full-window deck viewport */
+      .deck-viewport {
+          position: fixed;
+          inset: 0;
+          overflow: hidden;
+          background: var(--stage-bg, #000);
+      }
+
+      /* 3. Fixed 16:9 design canvas.
+         JavaScript sets transform: translate(...) scale(...). */
+      .deck-stage {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          transform-origin: 0 0;
+          background: var(--slide-bg, #fff);
+      }
+
+      /* 4. Slides stack inside the fixed stage.
+         Content must be laid out at 1920x1080, not reflowed per device. */
+      .slide {
+          position: absolute;
+          inset: 0;
+          width: 1920px;
+          height: 1080px;
+          overflow: hidden;
+          display: block;
+          visibility: hidden;
+          opacity: 0;
+          pointer-events: none;
+          background: var(--slide-bg, #fff);
+      }
+
+      .slide.active,
+      .slide.visible {
+          visibility: visible;
+          opacity: 1;
+          pointer-events: auto;
+          z-index: 1;
+      }
+
+      /* 5. Keep media inside authored slide bounds */
+      img,
+      video,
+      canvas,
+      svg {
+          max-width: 100%;
+          max-height: 100%;
+      }
+
+      /* 6. Presentation chrome stays outside the slide design system */
+      .deck-controls {
+          position: fixed;
+          left: 50%;
+          bottom: 22px;
+          transform: translateX(-50%);
+          z-index: 1000;
+      }
+
+      /* 7. Print one fixed-size slide per page */
+      @media print {
+          html,
+          body {
+              width: 1920px;
+              height: auto;
+              overflow: visible;
+              background: #fff;
+          }
+
+          .deck-viewport {
+              position: static;
+              overflow: visible;
+              background: #fff;
+          }
+
+          .deck-stage {
+              position: static;
+              width: auto;
+              height: auto;
+              transform: none !important;
+              background: none;
+          }
+
+          .slide {
+              position: relative;
+              display: block !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+              pointer-events: auto !important;
+              width: 1920px;
+              height: 1080px;
+              break-after: page;
+              page-break-after: always;
+          }
+
+          .slide:last-child {
+              break-after: auto;
+              page-break-after: auto;
+          }
+
+          .deck-controls {
+              display: none !important;
+          }
+      }
+
+      /* 8. Reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+              animation-duration: 0.01ms !important;
+              transition-duration: 0.2s !important;
+          }
+      }
+
+      /* === BURGUNDY CLINICAL DESIGN SYSTEM TOKENS === */
+      :root {
+        --stage-bg: #18060A;
+        --slide-bg: #260A10;
+        --card-bg: #380F17;
+        --card-border: #5E1C28;
+        --crimson: #8F0B13;
+        --critical: #DC2011;
+        --ivory: #EFDFC5;
+        --charcoal: #252B2B;
+        --slate-grey: #4C4F54;
+        --ink: #FAF8F5;
+        --muted: #D4C1B2;
+        --font-display: 'Instrument Serif', Georgia, serif;
+        --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      .slide {
+        font-family: var(--font-sans);
+        color: var(--ink);
+        padding: 76px 96px 110px 96px;
+        background:
+          radial-gradient(900px 580px at 90% 8%, rgba(143, 11, 19, 0.28), transparent 60%),
+          radial-gradient(760px 500px at 10% 92%, rgba(239, 223, 197, 0.08), transparent 60%),
+          var(--slide-bg);
+        transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .slide-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        border-bottom: 1px solid var(--card-border);
+        padding-bottom: 24px;
+        margin-bottom: 44px;
+      }
+
+      .slide-title {
+        font-family: var(--font-display);
+        font-size: 64px;
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+        margin: 0;
+        color: var(--ink);
+      }
+
+      .slide-title span {
+        color: var(--ivory);
+        font-style: italic;
+      }
+
+      .slide-tag {
+        font-family: var(--font-mono);
+        font-size: 18px;
+        color: var(--ivory);
+        background: rgba(143, 11, 19, 0.45);
+        border: 1px solid rgba(239, 223, 197, 0.35);
+        padding: 8px 18px;
+        border-radius: 999px;
+      }
+
+      .slide-footer {
+        position: absolute;
+        left: 96px;
+        right: 96px;
+        bottom: 42px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        color: var(--muted);
+        border-top: 1px solid var(--card-border);
+        padding-top: 16px;
+      }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(18px);
+        transition:
+          opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .slide.active .reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .slide.active .d1 { transition-delay: 0.06s; }
+      .slide.active .d2 { transition-delay: 0.14s; }
+      .slide.active .d3 { transition-delay: 0.22s; }
+      .slide.active .d4 { transition-delay: 0.30s; }
+
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 28px;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+      }
+
+      .panel {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 14px;
+        padding: 32px;
+      }
+
+      .panel-ivory {
+        background: var(--ivory);
+        border: 1px solid #D7C19D;
+        border-radius: 14px;
+        padding: 32px;
+        color: var(--charcoal);
+      }
+
+      .panel h3 {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 14px 0;
+        color: var(--ink);
+      }
+
+      .panel-ivory h3 {
+        font-size: 26px;
+        font-weight: 700;
+        margin: 0 0 14px 0;
+        color: var(--card-bg);
+      }
+
+      .panel p,
+      .panel li {
+        font-size: 21px;
+        line-height: 1.5;
+        color: #EFE5DC;
+      }
+
+      .panel-ivory p,
+      .panel-ivory li {
+        font-size: 21px;
+        line-height: 1.5;
+        color: var(--charcoal);
+      }
+
+      .panel ul,
+      .panel-ivory ul {
+        margin: 0;
+        padding-left: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .mono-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 8px;
+        background: rgba(143, 11, 19, 0.45);
+        color: var(--ivory);
+        border: 1px solid rgba(239, 223, 197, 0.35);
+      }
+
+      .ivory-badge {
+        display: inline-block;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        font-weight: 600;
+        padding: 4px 12px;
+        border-radius: 8px;
+        background: var(--ivory);
+        color: var(--card-bg);
+        border: 1px solid #C9B08B;
+      }
+
+      .kpi-num {
+        font-family: var(--font-mono);
+        font-size: 56px;
+        font-weight: 700;
+        color: var(--ivory);
+        line-height: 1.05;
+        margin: 10px 0;
+      }
+
+      table.deck-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 20px;
+      }
+
+      table.deck-table th {
+        text-align: left;
+        font-family: var(--font-mono);
+        font-size: 16px;
+        text-transform: uppercase;
+        color: var(--ivory);
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--card-border);
+      }
+
+      table.deck-table td {
+        padding: 18px 20px;
+        border-bottom: 1px solid rgba(94, 28, 40, 0.7);
+        color: #FAF8F5;
+        line-height: 1.4;
+      }
+
+      .deck-controls {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 10px 18px;
+        border-radius: 999px;
+        background: rgba(38, 10, 16, 0.92);
+        border: 1px solid #5E1C28;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        color: #FAF8F5;
+      }
+
+      .deck-controls button {
+        background: #380F17;
+        color: #EFDFC5;
+        border: 1px solid #5E1C28;
+        padding: 6px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-family: var(--font-mono);
+        font-size: 12px;
+      }
+
+      .deck-controls button:hover {
+        background: #8F0B13;
+        color: #FFFFFF;
+        border-color: #8F0B13;
+      }
+
+      .progress-track {
+        width: 140px;
+        height: 6px;
+        background: #380F17;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: var(--ivory);
+        transition: width 0.25s ease;
+      }
+
+      .edit-indicator {
+        display: none;
+        color: #EFDFC5;
+        font-size: 12px;
+      }
+
+      body.editing .edit-indicator {
+        display: inline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck-viewport">
+      <div class="deck-stage" id="deckStage">
+        <!-- === SLIDE 1: TITLE & TEAM === -->
+        <section class="slide active" data-slide="1">
+          <div style="display:flex; flex-direction:column; justify-content:space-between; height:100%;">
+            <div style="display:flex; justify-content:space-between; align-items:center;" class="reveal d1">
+              <span class="mono-badge">BTech Academic Project Defense</span>
+              <span class="ivory-badge">Production: ai-medical-records.vercel.app</span>
+            </div>
+
+            <div class="reveal d2" style="max-width: 1440px;">
+              <h1 style="font-family: var(--font-display); font-size: 112px; font-weight: 400; line-height: 1.02; margin: 0; letter-spacing: -0.025em;">
+                MedVault <span style="color: var(--ivory); font-style: italic;">AI</span>
+              </h1>
+              <p style="font-size: 36px; line-height: 1.38; color: #EFE5DC; margin: 26px 0 0 0; max-width: 1280px;">
+                A normalised 3NF relational medical record database paired with citation-verified AI summarisation and natural-language clinical retrieval.
+              </p>
+            </div>
+
+            <div class="grid-3 reveal d3">
+              <div class="panel">
+                <div class="mono-badge">Team Member 01</div>
+                <h3 style="margin-top: 16px; font-size: 30px;">Pushkar Panwar</h3>
+                <p style="font-family: var(--font-mono); color: var(--ivory); margin: 0;">Roll No: 2501730022</p>
+                <p style="margin-top: 10px; font-size: 19px;">Schema architecture, Auth &amp; RBAC, CRUD routers, synthetic clinical storylines.</p>
+              </div>
+              <div class="panel">
+                <div class="mono-badge">Team Member 02</div>
+                <h3 style="margin-top: 16px; font-size: 30px;">Saksham Singh</h3>
+                <p style="font-family: var(--font-mono); color: var(--ivory); margin: 0;">Roll No: 2501730270</p>
+                <p style="margin-top: 10px; font-size: 19px;">Grounded AI synthesis, NL retrieval planner, Burgundy Clinical UI &amp; tests.</p>
+              </div>
+              <div class="panel-ivory">
+                <div class="ivory-badge">Core Guarantee</div>
+                <h3 style="margin-top: 16px; font-size: 30px;">Zero Hallucination</h3>
+                <p style="margin-top: 10px; font-size: 19px;">SQL computes every count, trend, and date span. AI prose must pass primary-key citation checks.</p>
+              </div>
+            </div>
+          </div>
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Burgundy Clinical EHR</span>
+            <span>Slide 01 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 2: PROBLEM & CORE THESIS === -->
+        <section class="slide" data-slide="2">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">Problem Statement &amp; <span>Core Thesis</span></h2>
+            <span class="slide-tag">Architecture Principle</span>
+          </div>
+
+          <div class="grid-2">
+            <div class="panel reveal d2">
+              <h3>Why Manual Chart Review Breaks Down</h3>
+              <ul>
+                <li>Patient histories span multiple specialists, years, lab panels, and prescription adjustments.</li>
+                <li>Clinicians miss recurring symptoms or earlier drug allergies buried in unstructured progress notes.</li>
+                <li>Unconstrained LLM chatbots invent diagnoses or misstate medication dosages when fed raw text.</li>
+              </ul>
+            </div>
+
+            <div class="panel-ivory reveal d3">
+              <h3>Our Thesis: SQL Computes Facts, AI Writes Cited Prose</h3>
+              <ul>
+                <li>Relational SQL calculates recurrence counts, HbA1c trajectories, and date windows deterministically.</li>
+                <li>Every database row carries a typed primary-key tag (<code>[V-1]</code>, <code>[SYM-2]</code>, <code>[DX-3]</code>, <code>[RX-4]</code>).</li>
+                <li>The validation gate drops any AI claim lacking a verified record tag and surfaces missing fields directly.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="grid-4 reveal d4" style="margin-top: 32px;">
+            <div class="panel">
+              <div class="mono-badge">Schema</div>
+              <div class="kpi-num">13</div>
+              <p style="margin:0; font-size:18px;">Normalised 3NF tables with indexed foreign keys</p>
+            </div>
+            <div class="panel">
+              <div class="mono-badge">Storylines</div>
+              <div class="kpi-num">6 / 15</div>
+              <p style="margin:0; font-size:18px;">Synthetic patients across 15 multi-year visits</p>
+            </div>
+            <div class="panel">
+              <div class="mono-badge">Grounding</div>
+              <div class="kpi-num">100%</div>
+              <p style="margin:0; font-size:18px;">Verified citations enforced at runtime</p>
+            </div>
+            <div class="panel">
+              <div class="mono-badge">Design System</div>
+              <div class="kpi-num">Light + Dark</div>
+              <p style="margin:0; font-size:18px;">Burgundy Clinical tokens across all components</p>
+            </div>
+          </div>
+
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Burgundy Clinical EHR</span>
+            <span>Slide 02 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 3: 3NF RELATIONAL DATABASE === -->
+        <section class="slide" data-slide="3">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">3NF Relational <span>Database Design</span></h2>
+            <span class="slide-tag">PostgreSQL 16 + SQLite</span>
+          </div>
+
+          <div class="grid-3 reveal d2">
+            <div class="panel">
+              <span class="mono-badge">Identity &amp; Access</span>
+              <h3 style="margin-top:16px;">Users, Roles, Doctors</h3>
+              <ul>
+                <li><code>roles</code> separates Admin and Doctor privileges.</li>
+                <li><code>users</code> stores bcrypt hashes and active status.</li>
+                <li><code>doctors</code> holds license numbers, department, and specialization.</li>
+                <li><code>patient_doctor</code> models M:N care assignments.</li>
+              </ul>
+            </div>
+
+            <div class="panel">
+              <span class="mono-badge">Patient Core</span>
+              <h3 style="margin-top:16px;">Patients, Allergies, History</h3>
+              <ul>
+                <li><code>patients</code> stores demographics and unique MRNs.</li>
+                <li><code>allergies</code> enforces reaction severity CHECK rules.</li>
+                <li><code>medical_history</code> tracks chronic, past, surgical, and family history.</li>
+                <li>Partial index covers active patient lookups.</li>
+              </ul>
+            </div>
+
+            <div class="panel">
+              <span class="mono-badge">Encounter Graph</span>
+              <h3 style="margin-top:16px;">Visits &amp; 5 Child Tables</h3>
+              <ul>
+                <li><code>visits</code> links patient, doctor, vitals, and treatment plan.</li>
+                <li><code>symptoms</code>, <code>diagnoses</code>, <code>clinical_notes</code>, and <code>test_results</code> cascade on visit delete.</li>
+                <li><code>prescriptions</code> joins visits to <code>medications</code> without transitive dependencies.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="panel-ivory reveal d3" style="margin-top: 28px;">
+            <h3 style="margin-bottom: 10px;">Hardened Constraints &amp; Index Coverage</h3>
+            <p style="margin:0; font-size:21px;">
+              Every foreign key column carries an explicit B-tree index. Database <code>CHECK</code> constraints enforce sex, visit type, diagnosis status, heart rate (20 to 300 bpm), and SpO2 (50 to 100%).
+            </p>
+          </div>
+
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Schema Audit</span>
+            <span>Slide 03 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 4: CITATION-GROUNDED AI PIPELINE === -->
+        <section class="slide" data-slide="4">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">Citation-Grounded <span>AI Summarisation</span></h2>
+            <span class="slide-tag">4-Stage Pipeline</span>
+          </div>
+
+          <div class="grid-4 reveal d2">
+            <div class="panel">
+              <span class="mono-badge">Stage 01</span>
+              <h3 style="margin-top:16px;">Eager SQL Load</h3>
+              <p>Single joined-load query fetches visits, symptoms, diagnoses, prescriptions, notes, labs, and allergies.</p>
+            </div>
+            <div class="panel">
+              <span class="mono-badge">Stage 02</span>
+              <h3 style="margin-top:16px;">Fact Aggregator</h3>
+              <p>Python groups recurring symptoms, ICD-10 status transitions, repeat prescriptions, and longitudinal lab trends.</p>
+            </div>
+            <div class="panel">
+              <span class="mono-badge">Stage 03</span>
+              <h3 style="margin-top:16px;">Citation Validator</h3>
+              <p><code>validate_statements()</code> verifies every emitted tag against <code>citation_index</code> and strips unverified references.</p>
+            </div>
+            <div class="panel-ivory">
+              <span class="ivory-badge">Stage 04</span>
+              <h3 style="margin-top:16px;">Review &amp; Cache</h3>
+              <p>Clinicians click badges to inspect rows, flag questionable claims, and auto-invalidate caches on record updates.</p>
+            </div>
+          </div>
+
+          <div class="grid-2 reveal d3" style="margin-top: 32px;">
+            <div class="panel">
+              <h3>Diagnostic Conflict &amp; Missing Data Detection</h3>
+              <ul>
+                <li>Flags status progressions such as <em>Tension-Type Headache (Ruled-out) &rarr; Migraine with Aura (Confirmed)</em> on MRN-2026-00001.</li>
+                <li>Explicitly surfaces missing blood groups or emergency contacts (demonstrated on MRN-2026-00006) instead of guessing.</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3>Source Record Inspector &amp; Claim Flagging</h3>
+              <ul>
+                <li>Every badge like <code>[SYM-1]</code> or <code>[LAB-4]</code> opens a side drawer displaying the raw primary-key row.</li>
+                <li>Clinicians mark suspect AI claims via the per-statement <strong>Flag Issue</strong> control directly in the summary panel.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Deterministic Grounding Layer</span>
+            <span>Slide 04 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 5: NATURAL-LANGUAGE RETRIEVAL === -->
+        <section class="slide" data-slide="5">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">Intelligent <span>Historical Retrieval</span></h2>
+            <span class="slide-tag">Hybrid NL Query Engine</span>
+          </div>
+
+          <div class="grid-2 reveal d2">
+            <div class="panel">
+              <h3>How Natural-Language Questions Execute</h3>
+              <ul>
+                <li><strong>Temporal Parser:</strong> Extracts phrases like "last two years" into UTC date boundaries.</li>
+                <li><strong>Table Intent Router:</strong> Maps terms such as <em>diagnoses</em>, <em>prescribed</em>, or <em>labs</em> to target relational tables.</li>
+                <li><strong>Clinical Synonym Expander:</strong> Maps everyday queries ("sugar", "bp", "headaches") to clinical terms ("HbA1c", "hypertension", "migraine").</li>
+                <li><strong>Relevance Ranking:</strong> Scores matching records by term hit weight and recency, returning source cards beside the explanation.</li>
+              </ul>
+            </div>
+
+            <div class="panel-ivory">
+              <h3>Zero-Hallucination Refusal Guard</h3>
+              <p>When a clinician asks about an unrecorded condition (for example, "Find previous records mentioning Ebola"), the retriever returns zero matches and skips prose synthesis.</p>
+              <div style="margin-top: 24px; padding: 20px; border-radius: 12px; background: #380F17; color: #EFDFC5; font-family: var(--font-mono); font-size: 18px;">
+                total_matches = 0<br />
+                &rarr; "No matching clinical records were found in the database for this query. The AI module does not extrapolate or invent clinical facts."
+              </div>
+            </div>
+          </div>
+
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Natural-Language Clinical Query Engine</span>
+            <span>Slide 05 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 6: PRODUCTION PRODUCT AUDIT & VERIFICATION === -->
+        <section class="slide" data-slide="6">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">Production Design &amp; <span>Engineering Audit</span></h2>
+            <span class="slide-tag">End-to-End Transformation</span>
+          </div>
+
+          <div class="panel reveal d2">
+            <table class="deck-table">
+              <thead>
+                <tr>
+                  <th>Area</th>
+                  <th>Audit Finding</th>
+                  <th>Production Fix Implemented</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Visual Identity</strong></td>
+                  <td>Single-file UI lacked cohesive tokens and Dark mode</td>
+                  <td>Burgundy Clinical Design System (<code>DESIGN.md</code>, <code>ui.tsx</code>, Light/Dark themes)</td>
+                </tr>
+                <tr>
+                  <td><strong>Complete CRUD</strong></td>
+                  <td>Edit Patient, Add Allergy, History, and Multi-Lab Entry missing in UI</td>
+                  <td>Wired Edit Patient, Allergy, History, Edit Visit modals + multi-row Visit form</td>
+                </tr>
+                <tr>
+                  <td><strong>Data &amp; SQL</strong></td>
+                  <td>Unindexed FKs; dashboard scanned full tables in Python</td>
+                  <td>Indexed all FKs, added vital <code>CHECK</code>s, SQL <code>GROUP BY</code> queries, cache invalidation</td>
+                </tr>
+                <tr>
+                  <td><strong>TDD &amp; A11y</strong></td>
+                  <td>Frontend lacked automated component tests and mobile nav</td>
+                  <td>Vitest + Testing Library suite, Backend Pytest (7/7), mobile drawer, ARIA dialogs</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Verified with Backend Pytest + Frontend Vitest + TypeScript Build</span>
+            <span>Slide 06 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 7: SECURITY, RBAC & UI CRAFT === -->
+        <section class="slide" data-slide="7">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">Security, RBAC &amp; <span>Clinical UX Craft</span></h2>
+            <span class="slide-tag">Governance &amp; Accessibility</span>
+          </div>
+
+          <div class="grid-3 reveal d2">
+            <div class="panel">
+              <span class="mono-badge">Session Security</span>
+              <h3 style="margin-top:16px;">Bcrypt + Session JWT</h3>
+              <ul>
+                <li>Passwords salted and hashed via <code>bcrypt</code>.</li>
+                <li>JWT credentials stored in <code>sessionStorage</code> rather than persistent local storage.</li>
+                <li>Logout clears all session tokens immediately.</li>
+              </ul>
+            </div>
+
+            <div class="panel">
+              <span class="mono-badge">Audit Trail</span>
+              <h3 style="margin-top:16px;">Filterable Action Logs</h3>
+              <ul>
+                <li>Logs logins, demographic edits, visits, and AI calls.</li>
+                <li>Records user identity, role, patient ID, and UTC timestamp.</li>
+                <li>Filterable live inside the Audit Trail view.</li>
+              </ul>
+            </div>
+
+            <div class="panel-ivory">
+              <span class="ivory-badge">Burgundy Clinical UI</span>
+              <h3 style="margin-top:16px;">WCAG 2.2 AA Craft</h3>
+              <ul>
+                <li><code>#380F17</code> Burgundy, <code>#8F0B13</code> Crimson, <code>#EFDFC5</code> Warm Ivory, <code>#FAF8F5</code> Alabaster.</li>
+                <li>Mobile slide-over drawer, breadcrumbs, <code>/</code> search, <code>Esc</code> modal dismissal.</li>
+                <li>Clear semantic distinction between AI summaries and stored clinical records.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="slide-footer">
+            <span>MedVault AI &middot; Security &amp; Interface Architecture</span>
+            <span>Slide 07 / 08</span>
+          </div>
+        </section>
+
+        <!-- === SLIDE 8: DEMO WALKTHROUGH === -->
+        <section class="slide" data-slide="8">
+          <div class="slide-header reveal d1">
+            <h2 class="slide-title">Live Demo <span>Walkthrough</span></h2>
+            <span class="slide-tag">5-Minute Evaluation Script</span>
+          </div>
+
+          <div class="grid-2 reveal d2">
+            <div class="panel">
+              <h3>Step-by-Step Clinical Demo</h3>
+              <ul>
+                <li><strong>1. Sign In (30s):</strong> Log in as <em>Dr. Ananya Sharma, MD</em> using the one-click credential preset.</li>
+                <li><strong>2. Dashboard &amp; Directory (45s):</strong> Show SQL <code>GROUP BY</code> diagnosis/symptom charts, sorting, and pagination.</li>
+                <li><strong>3. Profile &amp; Grounded Summary (75s):</strong> Open <em>Aarav Mehta (MRN-2026-00001)</em>, inspect timeline filters, generate summary, click <code>[SYM-1]</code>, and flag a statement.</li>
+                <li><strong>4. Missing Data Guard (30s):</strong> Open <em>Zoya Farooqui (MRN-2026-00006)</em> to show explicit unrecorded blood group reporting.</li>
+                <li><strong>5. NL Query &amp; Multi-Item Entry (60s):</strong> Search headaches, test refusal on "Ebola", and run AI SOAP note extraction.</li>
+              </ul>
+            </div>
+
+            <div class="panel-ivory">
+              <h3>Deployment &amp; Submission Artifacts</h3>
+              <ul>
+                <li><strong>Production App:</strong> Deployed on Vercel (React SPA + FastAPI Python Serverless Function).</li>
+                <li><strong>Design System Spec:</strong> <code>PRODUCT.md</code> &amp; <code>DESIGN.md</code></li>
+                <li><strong>DDL Schema:</strong> <code>docs/DATABASE_SCHEMA.sql</code></li>
+                <li><strong>Editorial PDF Report:</strong> <code>docs/MedVault_AI_Technical_Report.pdf</code></li>
+                <li><strong>Slide Controls:</strong> Arrow keys to navigate, <code>E</code> to toggle inline text editing, <code>Ctrl+P</code> to export PDF.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="slide-footer">
+            <span>Pushkar Panwar (2501730022) &middot; Saksham Singh (2501730270)</span>
+            <span>Slide 08 / 08</span>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="deck-controls" aria-label="Slide navigation controls">
+      <button type="button" id="prevBtn">Prev</button>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill" style="width: 12.5%"></div>
+      </div>
+      <span id="slideCounter">1 / 8</span>
+      <button type="button" id="nextBtn">Next</button>
+      <button type="button" id="editBtn" title="Toggle inline editing (E)">Edit (E)</button>
+      <span class="edit-indicator">EDIT MODE</span>
+    </div>
+
+    <script>
+      (function () {
+        const stage = document.getElementById('deckStage');
+        const slides = Array.from(document.querySelectorAll('.slide'));
+        const counter = document.getElementById('slideCounter');
+        const progress = document.getElementById('progressFill');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const editBtn = document.getElementById('editBtn');
+        let current = 0;
+        let isEditing = false;
+
+        function scaleStage() {
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const scale = Math.min(vw / 1920, vh / 1080);
+          const x = (vw - 1920 * scale) / 2;
+          const y = (vh - 1080 * scale) / 2;
+          stage.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        }
+
+        function showSlide(index) {
+          current = Math.max(0, Math.min(slides.length - 1, index));
+          slides.forEach((s, idx) => {
+            s.classList.toggle('active', idx === current);
+          });
+          counter.textContent = `${current + 1} / ${slides.length}`;
+          progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+        }
+
+        function toggleEditMode() {
+          isEditing = !isEditing;
+          document.body.classList.toggle('editing', isEditing);
+          slides.forEach((s) => {
+            s.querySelectorAll('h1, h2, h3, p, li').forEach((el) => {
+              el.contentEditable = isEditing ? 'true' : 'false';
+            });
+          });
+        }
+
+        prevBtn.addEventListener('click', () => showSlide(current - 1));
+        nextBtn.addEventListener('click', () => showSlide(current + 1));
+        editBtn.addEventListener('click', toggleEditMode);
+
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'e' || e.key === 'E') {
+            if (!isEditing || e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              toggleEditMode();
+            }
+            return;
+          }
+          if (isEditing && e.target && e.target.isContentEditable) return;
+          if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+            e.preventDefault();
+            showSlide(current + 1);
+          } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+            e.preventDefault();
+            showSlide(current - 1);
+          } else if (e.key === 'Home') {
+            showSlide(0);
+          } else if (e.key === 'End') {
+            showSlide(slides.length - 1);
+          }
+        });
+
+        window.addEventListener('resize', scaleStage);
+        scaleStage();
+        showSlide(0);
+      })();
+    </script>
+  </body>
+</html>
