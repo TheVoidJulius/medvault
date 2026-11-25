@@ -8,7 +8,7 @@ MedVault AI stores longitudinal patient histories in a 13-table Third Normal For
 
 - **Live Production URL:** https://ai-medical-records.vercel.app
 - **Presentation Deck:** Open `/presentation.html` inside the app or `docs/presentation.html` locally.
-- **Technical PDF Report:** `docs/MedVault_AI_Technical_Report.pdf`
+- **Project report and flow (PDF):** `docs/MedVault_AI_Project_Report.pdf`
 
 ---
 
@@ -110,9 +110,10 @@ cd c:\Users\flypi\Desktop\projects\ai-medical-records\frontend
 npm run build
 ```
 
-**Regenerate the editorial PDF report:**
+**Regenerate the project report PDF** (needs `pip install reportlab`; reads live numbers from the seeded database and screenshots from `docs/screenshots/`):
 ```powershell
-python c:\Users\flypi\Desktop\projects\ai-medical-records\backend\scripts\generate_pdf_report.py
+cd c:\Users\flypi\Desktop\projects\ai-medical-records\backend
+.\.venv\Scripts\python.exe scripts\generate_report.py
 ```
 
 ---
@@ -129,12 +130,12 @@ The backend defaults to local SQLite (`medical_records.db`, or `/tmp/medical_rec
    ```env
    DATABASE_URL=postgresql://medadmin:medpassword123@localhost:5432/medical_records_db
    ```
-3. Restart Uvicorn to create tables and seed the 6 synthetic clinical storylines.
+3. Restart Uvicorn to create tables and seed the 162 synthetic patients.
 
 ---
 
 ## Project Documentation
 - [SQL DDL Schema (`docs/DATABASE_SCHEMA.sql`)](docs/DATABASE_SCHEMA.sql)
-- [Engineering Audit & Viva Guide (`docs/PROJECT_REPORT_AND_VIVA_GUIDE.md`)](docs/PROJECT_REPORT_AND_VIVA_GUIDE.md)
-- [Editorial PDF Technical Report (`docs/MedVault_AI_Technical_Report.pdf`)](docs/MedVault_AI_Technical_Report.pdf)
+- [Project report and flow, PDF (`docs/MedVault_AI_Project_Report.pdf`)](docs/MedVault_AI_Project_Report.pdf): architecture, user flow, AI pipelines, database, screenshots, demo script and viva questions
+- [Screenshots of every screen (`docs/screenshots/`)](docs/screenshots/)
 - [16:9 HTML Presentation Deck (`docs/presentation.html`)](docs/presentation.html)
