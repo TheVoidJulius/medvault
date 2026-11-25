@@ -54,7 +54,7 @@ export function Overview() {
         lede={`${c.total_patients} patients and ${c.total_visits} visits on record${latest ? `. Latest visit ${formatDate(latest)}.` : '.'}`}
       />
 
-      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule sm:grid-cols-3 lg:grid-cols-6">
+      <dl className="nums grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule sm:grid-cols-3 lg:grid-cols-6">
         {counts.map((k) => (
           <div key={k.label} className="bg-sheet px-5 py-4">
             <dt className="text-[0.8125rem] text-ink-3">{k.label}</dt>

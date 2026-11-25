@@ -35,10 +35,11 @@ function Statements({
             key={key}
             className={cx(
               'group rounded-ctl border px-3 py-2.5 text-[0.8125rem] leading-relaxed',
-              isFlagged ? 'border-warn/50 bg-warn-wash' : tone === 'alert' ? 'border-trace/25 bg-trace-wash' : tone === 'gap' ? 'border-dashed border-rule-strong' : 'border-transparent hover:border-rule',
+              isFlagged ? 'border-warn/50 bg-warn-wash' : tone === 'alert' && s.citations.length ? 'border-trace/25 bg-trace-wash' : tone === 'gap' ? 'border-dashed border-rule-strong' : 'border-transparent hover:border-rule',
             )}
           >
-            <span className={tone === 'alert' ? 'font-medium text-trace' : ''}>{s.text}</span>
+            {/* An alert with no cited row is an all-clear ("no known allergies"), not a danger. */}
+            <span className={tone === 'alert' && s.citations.length ? 'font-medium text-trace' : ''}>{s.text}</span>
             <Citations tags={s.citations} index={summary.citation_index} patientId={patientId} />
             <div className="mt-1.5">
               <button

@@ -106,8 +106,9 @@
   .code {
     @apply font-mono text-[0.75rem] tracking-[-0.01em];
   }
-  table,
-  dd {
+  /* Tabular figures only where digits must line up; applying them to running
+     text gives punctuation digit-width gaps ("Dr . Sharma"). */
+  .nums {
     font-variant-numeric: tabular-nums;
   }
 }
