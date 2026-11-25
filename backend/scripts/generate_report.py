@@ -472,7 +472,7 @@ def build():
               Spacer(1, 22 * mm)]
     story.append(table([
         ["Team", "Pushkar Panwar (2501730022), Saksham Singh (2501730270)"],
-        ["Live app", "https://ai-medical-records.vercel.app (and medvault-ai-thevoidjulius.vercel.app)"],
+        ["Live app", "https://medvault-ai-smoky.vercel.app (also ai-medical-records.vercel.app once redeployed)"],
         ["Source", "github.com/saxamsingh/ai-medical-records"],
         ["Report date", f"{date.today():%d %B %Y}"],
     ], [32 * mm, CONTENT_W - 32 * mm], header=False))

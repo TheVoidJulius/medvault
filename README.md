@@ -6,7 +6,7 @@
 
 MedVault AI stores longitudinal patient histories in a 13-table Third Normal Form (3NF) relational database and pairs them with a citation-grounded AI synthesis and natural-language retrieval engine.
 
-- **Live Production URL:** https://ai-medical-records.vercel.app
+- **Live Production URL:** https://medvault-ai-smoky.vercel.app (Pushkar's deployment; https://ai-medical-records.vercel.app is Saksham's)
 - **Presentation Deck:** Open `/presentation.html` inside the app or `docs/presentation.html` locally.
 - **Project report and flow (PDF):** `docs/MedVault_AI_Project_Report.pdf`
 
