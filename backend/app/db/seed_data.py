@@ -2,6 +2,7 @@ from datetime import date, datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash
+from app.db.cohort import seed_cohort
 from app.models import (
     Allergy,
     ClinicalNote,
@@ -984,6 +985,14 @@ def seed_database_if_empty(db: Session) -> dict:
             ("Erythrocyte Sedimentation Rate (ESR)", "16", "mm/hr", "0 - 20", "Normal", "Normalized from 54 mm/hr"),
             ("ALT (SGPT)", "26", "U/L", "7 - 56", "Normal", "No hepatotoxicity on Methotrexate"),
         ],
+    )
+
+    # Generated cohort: ~150 more patients across Indian regions and common OPD conditions.
+    seed_cohort(
+        db,
+        meds,
+        {"internal": doc_internal, "neuro": doc_neuro, "pulmo": doc_pulmo},
+        next_mrn=7,
     )
 
     db.commit()

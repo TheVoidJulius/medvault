@@ -607,167 +607,142 @@ function createMockFetch() {
   });
 }
 
-async function loginAsDoctor() {
+async function signInAsDoctor() {
+  window.location.hash = '';
   render(<App />);
-  fireEvent.click(screen.getByText('Dr. Ananya Sharma, MD'));
-  fireEvent.click(screen.getByRole('button', { name: /Access Clinical Workspace/i }));
-  await waitFor(() => {
-    expect(screen.getByText('Clinical Intelligence Dashboard')).toBeInTheDocument();
-  });
+  fireEvent.click(screen.getByRole('button', { name: /Dr\. Ananya Sharma, MD/ }));
+  fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+  await waitFor(() => expect(screen.getByRole('heading', { name: /Overview for Ananya/ })).toBeInTheDocument());
 }
 
-describe('MedVault AI Clinical Frontend', () => {
-  let fetchMock: ReturnType<typeof createMockFetch>;
+async function openAaravChart() {
+  fireEvent.click(screen.getByRole('button', { name: 'Patients' }));
+  const main = screen.getByRole('main');
+  await waitFor(() => expect(within(main).getByText('Aarav Mehta')).toBeInTheDocument());
+  fireEvent.click(within(main).getByRole('button', { name: 'Open chart for Aarav Mehta' }));
+  await waitFor(() => expect(within(main).getByRole('heading', { level: 1, name: 'Aarav Mehta' })).toBeInTheDocument());
+  return main;
+}
 
+describe('MedVault AI frontend', () => {
   beforeEach(() => {
     sessionStorage.clear();
     localStorage.clear();
     document.documentElement.removeAttribute('data-theme');
-    fetchMock = createMockFetch();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
+    globalThis.fetch = createMockFetch() as unknown as typeof fetch;
   });
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('a) handles login presets and stores JWT exclusively in sessionStorage', async () => {
-    await loginAsDoctor();
+  it('keeps the session token in sessionStorage only', async () => {
+    await signInAsDoctor();
     expect(sessionStorage.getItem('medvault_token')).toBe('mock-jwt-token-2026');
     expect(localStorage.getItem('medvault_token')).toBeNull();
   });
 
-  it('b) renders dashboard KPI cards, SQL group-by bars, and toggles Light/Dark theme', async () => {
-    await loginAsDoctor();
-    expect(screen.getByText('86')).toBeInTheDocument();
-    expect(screen.getByText('6 dx')).toBeInTheDocument();
-    expect(screen.getByText('5 visits')).toBeInTheDocument();
+  it('shows record counts and charts on the overview and switches theme', async () => {
+    await signInAsDoctor();
+    const main = screen.getByRole('main');
+    expect(within(main).getByText('Diagnoses').nextSibling).toHaveTextContent('18');
+    expect(within(main).getByText('6 dx')).toBeInTheDocument();
+    expect(within(main).getByText('5 reports')).toBeInTheDocument();
+    expect(within(main).getByText('Recurring throbbing unilateral headaches')).toBeInTheDocument();
 
-    const toggleBtn = screen.getByRole('button', { name: 'Switch to dark theme' });
-    fireEvent.click(toggleBtn);
+    fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     expect(localStorage.getItem('medvault_theme')).toBe('dark');
-
     fireEvent.click(screen.getByRole('button', { name: 'Switch to light theme' }));
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 
-  it('c) filters, sorts, paginates Patients Directory and resets zero-match search', async () => {
-    await loginAsDoctor();
-    fireEvent.click(screen.getByRole('button', { name: /Patients & EHR Directory/i }));
-
+  it('searches, filters and sorts the patient list and recovers from an empty result', async () => {
+    await signInAsDoctor();
+    fireEvent.click(screen.getByRole('button', { name: 'Patients' }));
     const main = screen.getByRole('main');
-    await waitFor(() => {
-      expect(within(main).getByText('Aarav Mehta')).toBeInTheDocument();
-      expect(within(main).getByText('Meera Iyer')).toBeInTheDocument();
-    });
-    expect(within(main).queryByText('Vikram Bhatia')).not.toBeInTheDocument();
-
-    fireEvent.click(within(main).getByRole('button', { name: /Next/i }));
+    await waitFor(() => expect(within(main).getByText('Zara Siddiqui')).toBeInTheDocument());
     expect(within(main).getByText('Vikram Bhatia')).toBeInTheDocument();
-    expect(within(main).getByText('Zara Siddiqui')).toBeInTheDocument();
 
     fireEvent.change(within(main).getByLabelText('Filter by sex'), { target: { value: 'Female' } });
     fireEvent.change(within(main).getByLabelText('Filter by blood group'), { target: { value: 'O+' } });
     fireEvent.change(within(main).getByLabelText('Sort patients'), { target: { value: 'name' } });
-    await waitFor(() => {
-      expect(within(main).getByText('Isha Desai')).toBeInTheDocument();
-      expect(within(main).getByText('Zara Siddiqui')).toBeInTheDocument();
-    });
+    const names = within(main)
+      .getAllByRole('button', { name: /^Open chart for/ })
+      .map((b) => b.textContent);
+    expect(names).toEqual(['Isha Desai', 'Zara Siddiqui']);
 
-    const searchInput = within(main).getByLabelText('Search patients by name, MRN, phone, or diagnosis');
-    fireEvent.change(searchInput, { target: { value: 'zzzzz-no-patient' } });
-    await waitFor(() => {
-      expect(within(main).getByRole('button', { name: 'Reset Search & Filters' })).toBeInTheDocument();
-    });
-
-    fireEvent.click(within(main).getByRole('button', { name: 'Reset Search & Filters' }));
-    await waitFor(() => {
-      expect(within(main).getByText('Aarav Mehta')).toBeInTheDocument();
-    });
+    fireEvent.change(within(main).getByLabelText('Search patients'), { target: { value: 'zzzzz-no-patient' } });
+    expect(within(main).getByText('No patient matches')).toBeInTheDocument();
+    fireEvent.click(within(main).getByRole('button', { name: 'Clear search and filters' }));
+    expect(within(main).getByText('Aarav Mehta')).toBeInTheDocument();
   });
 
-  it('d) opens patient detail, edits demographics, records allergy alert, and filters timeline', async () => {
-    await loginAsDoctor();
-    fireEvent.click(screen.getByRole('button', { name: /Patients & EHR Directory/i }));
-    const main = screen.getByRole('main');
-    await waitFor(() => expect(within(main).getByText('Aarav Mehta')).toBeInTheDocument());
+  it('edits demographics, records an allergy and filters the visit timeline', async () => {
+    await signInAsDoctor();
+    const main = await openAaravChart();
+    expect(within(main).getByText('MV-2026-0001')).toBeInTheDocument();
 
-    fireEvent.click(within(main).getAllByRole('button', { name: 'Open Medical Records' })[0]);
-    await waitFor(() => expect(within(main).getByText('MV-2026-0001')).toBeInTheDocument());
-
-    fireEvent.click(within(main).getByRole('button', { name: /Edit Profile/i }));
+    fireEvent.click(within(main).getByRole('button', { name: /Edit profile/ }));
     const dialog = screen.getByRole('dialog');
-    fireEvent.change(within(dialog).getByLabelText(/^Phone/i), { target: { value: '+91-9999988888' } });
-    fireEvent.click(within(dialog).getByRole('button', { name: 'Save Profile Changes' }));
+    fireEvent.change(within(dialog).getByLabelText(/^Mobile/), { target: { value: '+91-99999-88888' } });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(within(main).getByText('+91-99999-88888')).toBeInTheDocument());
 
-    await waitFor(() => {
-      expect(within(main).getByText(/\+91-9999988888/)).toBeInTheDocument();
-    });
-
-    fireEvent.click(within(main).getByRole('button', { name: /Add Allergy/i }));
-    const algDialog = screen.getByRole('dialog');
-    fireEvent.change(within(algDialog).getByLabelText(/^Allergen/i), { target: { value: 'Sulfa Drugs' } });
-    fireEvent.change(within(algDialog).getByLabelText(/Clinical Reaction/i), { target: { value: 'Stevens-Johnson risk' } });
-    fireEvent.click(within(algDialog).getByRole('button', { name: 'Record Allergy Alert' }));
-
-    await waitFor(() => {
-      expect(within(main).getByText(/Allergy: Sulfa Drugs/i)).toBeInTheDocument();
-    });
+    fireEvent.click(within(main).getByRole('button', { name: /Add allergy/ }));
+    const allergyDialog = screen.getByRole('dialog');
+    fireEvent.change(within(allergyDialog).getByLabelText(/^Allergen/), { target: { value: 'Sulfa Drugs' } });
+    fireEvent.change(within(allergyDialog).getByLabelText(/^Reaction/), { target: { value: 'Stevens-Johnson risk' } });
+    fireEvent.click(within(allergyDialog).getByRole('button', { name: 'Record allergy' }));
+    await waitFor(() => expect(within(main).getByText(/Allergy: Sulfa Drugs/)).toBeInTheDocument());
 
     expect(within(main).getByText('Recurring throbbing unilateral headaches')).toBeInTheDocument();
     expect(within(main).getByText('Routine blood pressure follow-up')).toBeInTheDocument();
-
     fireEvent.change(within(main).getByLabelText('Filter by visit type'), { target: { value: 'Follow-up' } });
     expect(within(main).queryByText('Recurring throbbing unilateral headaches')).not.toBeInTheDocument();
     expect(within(main).getByText('Routine blood pressure follow-up')).toBeInTheDocument();
   });
 
-  it('e) opens AI Summary citation source drawer and flags an AI statement for review', async () => {
-    await loginAsDoctor();
-    fireEvent.click(screen.getByRole('button', { name: /Patients & EHR Directory/i }));
-    const main = screen.getByRole('main');
-    await waitFor(() => expect(within(main).getByText('Aarav Mehta')).toBeInTheDocument());
+  it('opens the cited source row from an AI summary and flags a statement', async () => {
+    await signInAsDoctor();
+    const main = await openAaravChart();
+    fireEvent.click(within(main).getByRole('tab', { name: /AI summary/ }));
+    await waitFor(() => expect(within(main).getByText(/Patient presents with recurring migraine headaches/i)).toBeInTheDocument());
 
-    fireEvent.click(within(main).getAllByRole('button', { name: 'Open Medical Records' })[0]);
-    await waitFor(() => expect(within(main).getByRole('tab', { name: /AI Grounded Summary/i })).toBeInTheDocument());
-
-    fireEvent.click(within(main).getByRole('tab', { name: /AI Grounded Summary/i }));
-    await waitFor(() => {
-      expect(within(main).getByText(/Patient presents with recurring migraine headaches/i)).toBeInTheDocument();
-    });
-
-    const symBtns = within(main).getAllByRole('button', { name: 'Inspect source record SYM-1' });
-    fireEvent.click(symBtns[0]);
-
+    fireEvent.click(within(main).getAllByRole('button', { name: 'Inspect source record SYM-1' })[0]);
     const drawer = screen.getByRole('dialog', { name: 'Citation source record inspector' });
     expect(within(drawer).getByText('Throbbing Headache (Moderate)')).toBeInTheDocument();
     fireEvent.click(within(drawer).getByRole('button', { name: 'Close source record inspector' }));
+    expect(screen.queryByRole('dialog', { name: 'Citation source record inspector' })).not.toBeInTheDocument();
 
-    const flagButtons = within(main).getAllByRole('button', { name: /Flag Issue/i });
-    fireEvent.click(flagButtons[0]);
-    expect(within(main).getByRole('button', { name: /Flagged for Review/i })).toBeInTheDocument();
-    expect(within(main).getByText(/Flagged for Clinician Review: 1/i)).toBeInTheDocument();
+    fireEvent.click(within(main).getAllByRole('button', { name: 'Flag for review' })[0]);
+    expect(within(main).getByRole('button', { name: 'Flagged for review' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(main).getByText('Flagged for review: 1')).toBeInTheDocument();
   });
 
-  it('f) executes AI Historical Retrieval and handles zero-match refusal state cleanly', async () => {
-    await loginAsDoctor();
-    fireEvent.click(screen.getByRole('button', { name: /AI Historical Retrieval/i }));
+  it('answers a records question with sources and refuses when nothing matches', async () => {
+    await signInAsDoctor();
+    fireEvent.click(screen.getByRole('button', { name: 'Ask the records' }));
     const main = screen.getByRole('main');
+    await waitFor(() => expect(within(main).getByText('1 matching record')).toBeInTheDocument());
+    expect(within(main).getByText('Source records (1)')).toBeInTheDocument();
+    expect(within(main).getByText('Throbbing Headache (Moderate)')).toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(within(main).getByText('Total Matches: 1')).toBeInTheDocument();
-      expect(within(main).getByText('Retrieved Database Records (1)')).toBeInTheDocument();
-      expect(within(main).getByText('Throbbing Headache (Moderate)')).toBeInTheDocument();
-    });
+    fireEvent.change(within(main).getByLabelText('Question about the records'), { target: { value: 'Find nonexistentxyz symptom in history' } });
+    fireEvent.click(within(main).getByRole('button', { name: 'Ask' }));
+    await waitFor(() => expect(within(main).getByText('Nothing in the record matches')).toBeInTheDocument());
+    expect(within(main).getByText('0 matching records')).toBeInTheDocument();
+  });
 
-    const queryBox = within(main).getByRole('textbox');
-    fireEvent.change(queryBox, { target: { value: 'Find nonexistentxyz symptom in history' } });
-    fireEvent.click(within(main).getByRole('button', { name: 'Run Query' }));
-
-    await waitFor(() => {
-      expect(within(main).getByText('Total Matches: 0')).toBeInTheDocument();
-      expect(within(main).getByText('Zero matching clinical records found')).toBeInTheDocument();
-    });
+  it('finds a patient from the command palette', async () => {
+    await signInAsDoctor();
+    await waitFor(() => expect(globalThis.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/patients'), expect.anything()));
+    fireEvent.keyDown(window, { key: 'k', ctrlKey: true });
+    const palette = screen.getByRole('dialog', { name: 'Command palette' });
+    fireEvent.change(within(palette).getByLabelText('Search patients and commands'), { target: { value: 'aarav' } });
+    await waitFor(() => expect(within(palette).getByText('Aarav Mehta')).toBeInTheDocument());
+    fireEvent.keyDown(within(palette).getByLabelText('Search patients and commands'), { key: 'Enter' });
+    await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Aarav Mehta' })).toBeInTheDocument());
+    expect(window.location.hash).toBe('#/patients/1/timeline');
   });
 });

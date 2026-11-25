@@ -2,112 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  MedVault design tokens.
+  Paper and ink come from the ward: ECG chart paper (rose millimetre grid),
+  graphite case-sheet ink, and the blue ballpoint Indian doctors sign
+  prescriptions with. Trace red is reserved for clinical danger.
+  Values are RGB triplets so Tailwind can apply alpha.
+*/
 :root {
-  --brand-burgundy: #380F17;
-  --brand-crimson: #8F0B13;
-  --brand-crimson-hover: #74080F;
-  --brand-critical: #DC2011;
-  --brand-ivory: #EFDFC5;
-  --brand-charcoal: #252B2B;
-  --brand-slate: #4C4F54;
+  color-scheme: light;
+  --paper: 245 246 244;
+  --sheet: 255 255 255;
+  --well: 238 240 237;
+  --rule: 220 224 219;
+  --rule-strong: 195 201 194;
+  --ink: 20 26 31;
+  --ink-2: 71 81 90;
+  --ink-3: 104 114 123;
+  --pen: 35 64 200;
+  --pen-strong: 26 47 153;
+  --pen-wash: 232 236 251;
+  --trace: 196 32 50;
+  --trace-wash: 251 233 234;
+  --ok: 23 112 76;
+  --ok-wash: 228 242 235;
+  --warn: 150 86 0;
+  --warn-wash: 251 240 221;
+  --rail: 20 26 31;
+  --rail-ink: 216 222 228;
+  --rail-line: 44 53 61;
+  --grid: 236 178 172;
 
-  --bg-canvas: #FAF8F5;
-  --bg-surface: #FFFFFF;
-  --bg-surface-muted: #F5F0E8;
-  --bg-ivory-tint: #FBF4E9;
-  --bg-sidebar: #380F17;
-  --bg-sidebar-hover: #4C1620;
-  --border-subtle: #E7E1DA;
-  --border-strong: #D4C8BA;
-
-  --ink-primary: #252B2B;
-  --ink-secondary: #4C4F54;
-  --ink-muted: #6C6E72;
-
-  --status-stable-bg: #ECFDF3;
-  --status-stable-fg: #1F5B38;
-  --status-stable-border: #BCE3C8;
-
-  --status-warning-bg: #FEF6E6;
-  --status-warning-fg: #92400E;
-  --status-warning-border: #F5D08A;
-
-  --status-critical-bg: #FEF2F2;
-  --status-critical-fg: #B91C1C;
-  --status-critical-border: #FECACA;
+  --series-1: #2340C8;
+  --series-2: #00A3A3;
+  --series-3: #D9822B;
+  --series-4: #9B4FC0;
 }
 
-[data-theme="dark"] {
-  --bg-canvas: #151213;
-  --bg-surface: #1E1A1B;
-  --bg-surface-muted: #272123;
-  --bg-ivory-tint: #2B211E;
-  --bg-sidebar: #260A10;
-  --bg-sidebar-hover: #380F17;
-  --border-subtle: #3A3032;
-  --border-strong: #4F4043;
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: 13 17 21;
+  --sheet: 22 27 32;
+  --well: 29 35 42;
+  --rule: 42 50 58;
+  --rule-strong: 60 70 80;
+  --ink: 231 235 239;
+  --ink-2: 169 179 189;
+  --ink-3: 132 143 154;
+  --pen: 142 162 255;
+  --pen-strong: 182 196 255;
+  --pen-wash: 30 38 72;
+  --trace: 255 120 130;
+  --trace-wash: 60 24 30;
+  --ok: 94 208 156;
+  --ok-wash: 18 46 36;
+  --warn: 240 178 90;
+  --warn-wash: 52 38 16;
+  --rail: 9 12 15;
+  --rail-ink: 200 208 216;
+  --rail-line: 34 42 50;
+  --grid: 120 52 60;
 
-  --ink-primary: #F7F2EA;
-  --ink-secondary: #D4C7BA;
-  --ink-muted: #A69A90;
-
-  --status-stable-bg: #13291C;
-  --status-stable-fg: #86EFAC;
-  --status-stable-border: #22543D;
-
-  --status-warning-bg: #2D200C;
-  --status-warning-fg: #FCD34D;
-  --status-warning-border: #78350F;
-
-  --status-critical-bg: #321214;
-  --status-critical-fg: #FCA5A5;
-  --status-critical-border: #7F1D1D;
+  --series-1: #6F86F5;
+  --series-2: #14A8A6;
+  --series-3: #D9822B;
+  --series-4: #AE72D6;
 }
 
 @layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
   body {
-    background-color: var(--bg-canvas);
-    color: var(--ink-primary);
-    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    @apply bg-paper text-ink font-sans text-[0.875rem] leading-[1.5];
   }
-
   ::selection {
-    background-color: #8F0B13;
-    color: #FFFFFF;
+    @apply bg-pen text-white;
   }
-
+  :focus-visible {
+    outline: 2px solid rgb(var(--pen));
+    outline-offset: 2px;
+  }
   input,
   textarea,
   select {
-    caret-color: #8F0B13;
-  }
-
-  :focus-visible {
-    outline: 2px solid #8F0B13;
-    outline-offset: 2px;
+    caret-color: rgb(var(--pen));
   }
 }
 
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
+@layer components {
+  /* ECG chart paper: 1mm minor lines, 5mm major lines. The product's signature surface. */
+  .ecg-paper {
+    background-color: rgb(var(--sheet));
+    background-image:
+      linear-gradient(rgb(var(--grid) / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid) / 0.55) 1px, transparent 1px),
+      linear-gradient(rgb(var(--grid) / 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid) / 0.22) 1px, transparent 1px);
+    background-size: 25px 25px, 25px 25px, 5px 5px, 5px 5px;
+    background-position: -1px -1px;
+  }
+  .code {
+    @apply font-mono text-[0.75rem] tracking-[-0.01em];
+  }
+  /* Tabular figures only where digits must line up; applying them to running
+     text gives punctuation digit-width gaps ("Dr . Sharma"). */
+  .nums {
+    font-variant-numeric: tabular-nums;
+  }
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
-
-::-webkit-scrollbar-track {
-  background: var(--bg-canvas);
-}
-
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #8F0B13;
+  background: rgb(var(--rule-strong));
+  border-radius: 999px;
+  border: 2px solid rgb(var(--paper));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -115,6 +128,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

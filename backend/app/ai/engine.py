@@ -5,7 +5,7 @@ import json
 import re
 from typing import Any, Dict, List, Optional, Tuple
 import httpx
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.core.config import settings
 from app.models import (
@@ -45,6 +45,9 @@ STOPWORDS = {
     "is", "are", "was", "been", "any", "give", "me", "list", "summarise", "summarize",
     "tell", "about", "history", "record", "records", "visit", "visits", "mentioning",
     "consultations", "consultation", "particular", "condition", "similar",
+    # Question scaffolding that otherwise matches almost every record by substring ("low" in "follow-up")
+    "which", "who", "whom", "whose", "did", "does", "ever", "there", "their", "them", "they",
+    "cases", "case", "people", "anyone", "someone", "low", "high", "raised", "elevated", "new",
 }
 
 SYNONYM_MAP = {
@@ -68,6 +71,20 @@ SYNONYM_MAP = {
     "anemia": ["anemia", "hemoglobin", "ferritin", "iron", "fatigue", "pallor"],
     "kidney": ["renal", "creatinine", "egfr", "urea", "proteinuria"],
     "fever": ["fever", "pyrexia", "chills", "infection"],
+    "dengue": ["dengue", "ns1", "platelet", "retro-orbital"],
+    "platelets": ["platelet", "thrombocytopenia", "dengue"],
+    "tb": ["tuberculosis", "cbnaat", "afb", "hrze", "ni-kshay"],
+    "tuberculosis": ["tuberculosis", "cbnaat", "afb", "hrze", "ni-kshay"],
+    "typhoid": ["typhoid", "enteric fever", "salmonella", "widal"],
+    "malaria": ["malaria", "plasmodium", "vivax", "falciparum", "chloroquine"],
+    "chikungunya": ["chikungunya", "arthralgia"],
+    "pcos": ["polycystic ovary", "pcos", "myo-inositol", "irregular menstrual"],
+    "copd": ["chronic obstructive", "copd", "tiotropium", "fev1/fvc"],
+    "depression": ["depressive", "phq-9", "escitalopram", "low mood"],
+    "anxiety": ["anxiety", "palpitations", "clonazepam"],
+    "liver": ["fatty liver", "alt (sgpt)", "hepatitis", "ursodeoxycholic"],
+    "pregnancy": ["gestational", "antenatal", "primigravida", "ogtt"],
+    "knee": ["osteoarthritis of knee", "knee pain", "crepitus"],
 }
 
 
@@ -805,17 +822,19 @@ def answer_natural_language_query(
         p = load_full_patient(db, patient_id)
         patients = [p] if p else []
     else:
+        # selectinload issues one query per collection; joinedload here multiplied rows across
+        # every child table and slowed cohort-wide questions as the patient count grew.
         patients = (
             db.query(Patient)
             .options(
-                joinedload(Patient.allergies),
-                joinedload(Patient.medical_history),
-                joinedload(Patient.visits).joinedload(Visit.doctor).joinedload(Doctor.user),
-                joinedload(Patient.visits).joinedload(Visit.symptoms),
-                joinedload(Patient.visits).joinedload(Visit.diagnoses),
-                joinedload(Patient.visits).joinedload(Visit.prescriptions).joinedload(Prescription.medication),
-                joinedload(Patient.visits).joinedload(Visit.clinical_notes),
-                joinedload(Patient.visits).joinedload(Visit.test_results),
+                selectinload(Patient.allergies),
+                selectinload(Patient.medical_history),
+                selectinload(Patient.visits).joinedload(Visit.doctor).joinedload(Doctor.user),
+                selectinload(Patient.visits).selectinload(Visit.symptoms),
+                selectinload(Patient.visits).selectinload(Visit.diagnoses),
+                selectinload(Patient.visits).selectinload(Visit.prescriptions).joinedload(Prescription.medication),
+                selectinload(Patient.visits).selectinload(Visit.clinical_notes),
+                selectinload(Patient.visits).selectinload(Visit.test_results),
             )
             .filter(Patient.is_active == True)
             .all()
