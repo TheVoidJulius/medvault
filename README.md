@@ -49,8 +49,38 @@ Web application runs at `http://localhost:5173`.
 
 ## Demo Login Accounts
 
-| Role | Name | Email | Password |
-|---|---|---|---|
+Every doctor account uses the password `Doctor@123`. The admin account uses `Admin@123`.
+
+| Role | Name | Email |
+|---|---|---|
+| Doctor | Dr. Ananya Sharma, MD (Internal Medicine) | `dr.sharma@medvault.edu` |
+| Doctor | Dr. Rajesh Verma, DM (Neurology) | `dr.verma@medvault.edu` |
+| Doctor | Dr. Priya Nair, MD (Pulmonology) | `dr.nair@medvault.edu` |
+| Doctor | Dr. Arjun Reddy, DM (Cardiology) | `dr.reddy@medvault.edu` |
+| Doctor | Dr. Farhan Qureshi, DM (Endocrinology) | `dr.qureshi@medvault.edu` |
+| Doctor | Dr. Lakshmi Subramanian, MS (Obstetrics & Gynaecology) | `dr.subramanian@medvault.edu` |
+| Doctor | Dr. Harpreet Kaur, MD (Paediatrics) | `dr.kaur@medvault.edu` |
+| Doctor | Dr. Sanjay Banerjee, DM (Nephrology) | `dr.banerjee@medvault.edu` |
+| Doctor | Dr. Meenakshi Pillai, DM (Gastroenterology) | `dr.pillai@medvault.edu` |
+| Doctor | Dr. Kunal Chatterjee, MD (Psychiatry) | `dr.chatterjee@medvault.edu` |
+| Doctor | Dr. Vivek Patil, MS (Orthopaedics) | `dr.patil@medvault.edu` |
+| Admin | Pushkar Panwar (System Admin) | `admin@medvault.edu` |
+
+The sign-in screen offers four of these as one-click presets.
+
+## Synthetic Patient Data
+
+The database seeds 162 synthetic patients and about 400 visits on first start:
+
+- **6 hand-written storylines** (`backend/app/db/seed_data.py`): Aarav Mehta's migraine, Meera Krishnan's diabetes, and four others. The tests rely on these.
+- **156 generated patients** (`backend/app/db/cohort*.py`): deterministic (fixed seed), so every deployment gets the same people. Names, surnames, localities and PIN codes come from matching regions: North Indian, Punjabi, Bengali, Tamil, Telugu, Kannada, Malayali, Marathi, Gujarati, Urdu-speaking, Bihari, Odia, Assamese and Sikkimese.
+- **23 clinical storylines** drawn from common Indian OPD practice: diabetes with hypertension, CKD, coronary artery disease, NAFLD, drug-sensitive TB on HRZE, dengue with falling platelets, typhoid, *P. vivax* malaria, chikungunya, childhood gastroenteritis, recurrent tonsillitis, UTI, hypothyroidism, PCOS, iron-deficiency anaemia, gestational diabetes, vitamin D/B12 deficiency, asthma, COPD from biomass smoke, knee osteoarthritis, GERD with *H. pylori*, and depression.
+
+Each storyline spans 1 to 3 visits with symptoms that recur, diagnoses that change status (provisional, confirmed, ruled out, resolved) and lab values that trend, so the AI summary has real material to cite. About 6% of patients have no blood group recorded and a few have no emergency contact number, so the data-gap detector has real gaps to find.
+
+To reseed locally, delete `backend/medical_records.db` and restart the API.
+
+---|---|---|---|
 | **Doctor** | Dr. Ananya Sharma, MD (Internal Medicine) | `dr.sharma@medvault.edu` | `Doctor@123` |
 | **Doctor** | Dr. Rajesh Verma, DM (Neurology) | `dr.verma@medvault.edu` | `Doctor@123` |
 | **Doctor** | Dr. Priya Nair, MD (Pulmonology) | `dr.nair@medvault.edu` | `Doctor@123` |
@@ -66,6 +96,12 @@ Click any account preset on the sign-in screen to populate credentials in one cl
 ```powershell
 cd c:\Users\flypi\Desktop\projects\ai-medical-records\backend
 .\.venv\Scripts\python.exe -m pytest -v
+```
+
+**Run the frontend test suite (`vitest`):**
+```powershell
+cd c:\Users\flypi\Desktop\projects\ai-medical-records\frontend
+npm test
 ```
 
 **Build the frontend bundle (`tsc` + `vite`):**

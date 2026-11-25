@@ -251,7 +251,34 @@ export interface AIQueryResponse {
   total_matches: number;
 }
 
+export interface FlaggedLab {
+  lab_id: number;
+  lab_tag: string;
+  visit_id: number;
+  patient_id: number;
+  patient_name: string;
+  patient_mrn: string;
+  test_name: string;
+  value: string;
+  unit?: string | null;
+  reference_range?: string | null;
+  flag: string;
+  result_date: string;
+}
+
+export interface AuditEntry {
+  id: number;
+  created_at: string;
+  user_name: string;
+  user_role: string;
+  action: string;
+  detail?: string | null;
+}
+
 export interface DashboardData {
+  visits_by_month?: { month: string; count: number }[];
+  visit_type_mix?: { visit_type: string; count: number }[];
+  flagged_labs?: FlaggedLab[];
   counts: {
     total_patients: number;
     total_visits: number;

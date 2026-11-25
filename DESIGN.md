@@ -1,121 +1,66 @@
 ---
-name: MedVault AI — Burgundy Clinical Design System
-description: Editorial healthcare record system pairing deep burgundy identity with warm ivory clinical surfaces and semantic clinical status clarity.
+name: MedVault AI — Chart Paper
+description: Clinical workspace built from ward materials (ECG chart paper, graphite case-sheet ink, the blue ballpoint prescriptions are signed with), with trace red reserved for danger.
 colors:
-  primary-brand: "#380F17"
-  primary-interaction: "#8F0B13"
-  critical-accent: "#DC2011"
-  warm-ivory: "#EFDFC5"
-  deep-charcoal: "#252B2B"
-  slate-grey: "#4C4F54"
-  white: "#FFFFFF"
-  warm-background: "#FAF8F5"
-  light-border: "#E7E1DA"
-  dark-background: "#161415"
-  dark-surface: "#1E1B1C"
-  dark-elevated: "#272224"
-  dark-border: "#3B3133"
-  status-stable: "#2F6B48"
-  status-warning: "#A16207"
+  paper: "#F5F6F4"
+  sheet: "#FFFFFF"
+  ink: "#141A1F"
+  pen: "#2340C8"
+  trace: "#C42032"
+  grid: "#ECB2AC"
+  ok: "#17704C"
+  warn: "#965600"
+  rail: "#141A1F"
 typography:
-  display:
-    fontFamily: "Newsreader, Georgia, serif"
-    fontSize: "1.875rem"
-    fontWeight: 600
-    lineHeight: 1.15
-    letterSpacing: "-0.02em"
-  body:
-    fontFamily: "IBM Plex Sans, system-ui, sans-serif"
-    fontSize: "0.875rem"
-    fontWeight: 400
-    lineHeight: 1.5
-  mono:
-    fontFamily: "JetBrains Mono, ui-monospace, monospace"
-    fontSize: "0.75rem"
-    fontWeight: 500
-    lineHeight: 1.4
+  ui: "Schibsted Grotesk, 400-800"
+  codes: "Fragment Mono (MRNs, ICD-10 codes, record tags, vitals only)"
 rounded:
-  sm: "6px"
-  md: "10px"
-  lg: "12px"
-spacing:
-  sm: "8px"
-  md: "16px"
-  lg: "24px"
-components:
-  button-primary:
-    backgroundColor: "{colors.primary-interaction}"
-    textColor: "{colors.white}"
-    rounded: "{rounded.md}"
-    padding: "8px 16px"
-  button-brand:
-    backgroundColor: "{colors.primary-brand}"
-    textColor: "{colors.warm-ivory}"
-    rounded: "{rounded.md}"
-    padding: "8px 16px"
-  card-clinical:
-    backgroundColor: "{colors.white}"
-    textColor: "{colors.deep-charcoal}"
-    rounded: "{rounded.lg}"
-    padding: "20px"
+  tag: "4px"
+  control: "8px"
+  panel: "14px"
 ---
 
-# Design System: MedVault AI (Burgundy Clinical)
+# MedVault AI design system
 
-## Overview
+## Idea
 
-**Creative North Star: "The Editorial Clinical Folio"**
+The interface uses what Indian clinicians already work with. ECG chart paper, with its rose millimetre grid, is the one signature surface. It appears on the sign-in hero and behind each patient's vitals strip, where heart rate and blood pressure are plotted from their recorded visits. Everything else is quiet: neutral paper, graphite ink, hairline rules.
 
-MedVault AI treats patient medical records with the precision of an authoritative clinical monograph. Deep burgundy (`#380F17`) anchors institutional navigation and identity, crimson (`#8F0B13`) guides deliberate clinician actions, and warm alabaster (`#FAF8F5`) paired with ivory (`#EFDFC5`) reduces harsh glare during extended chart review.
+## Colour roles
 
-We reject generic blue-and-teal AI dashboard tropes, heavy drop shadows, neon gradients, and decorative glassmorphism. Surfaces rely on crisp 1px borders (`#E7E1DA` in light mode, `#3B3133` in dark mode) and clear typographic weight steps.
+| Token | Use |
+|---|---|
+| `paper` / `sheet` / `well` | Canvas, panels, inset fills |
+| `ink`, `ink-2`, `ink-3` | Primary, secondary and muted text |
+| `pen` (ballpoint blue) | Primary actions, links, citation chips, selection, focus ring |
+| `trace` (ECG red) | Allergies, out-of-range labs, emergency visits, errors. Never decorative |
+| `ok` / `warn` | Confirmed or controlled vs. provisional status. Always paired with a text label |
+| `grid` | ECG paper lines only |
+| `--series-1..4` | Visit-type mix chart. Validated for colour-blind separation in both themes; colour follows the visit type, not its rank |
 
-## Colors
+All tokens are RGB triplets in `frontend/src/index.css` with a complete dark set under `[data-theme='dark']`.
 
-### Primary & Brand
-- **Deep Burgundy** (`#380F17`): Sidebar navigation shell, active brand identity, primary table headers, and dark editorial panels.
-- **Clinical Crimson** (`#8F0B13`): Primary CTA buttons, active tab indicators, focus rings, text selection, and interactive citation links.
-- **Critical Red** (`#DC2011`): Life-threatening allergies, abnormal critical labs, error banners, and destructive confirmation actions.
+## Type
 
-### Accents & Neutrals
-- **Warm Ivory** (`#EFDFC5`): Highlighted AI synthesis callouts, citation verification containers, and warm editorial emphasis on dark burgundy backgrounds.
-- **Deep Charcoal** (`#252B2B`): High-contrast primary body text and data values on light surfaces.
-- **Slate Grey** (`#4C4F54`): Secondary metadata, table column headers, helper captions, and muted descriptions.
-- **Alabaster Canvas** (`#FAF8F5`), **Pure White** (`#FFFFFF`), and **Warm Sandstone Border** (`#E7E1DA`): Layered light-mode surfaces.
-- **Obsidian Wine Canvas** (`#161415`), **Espresso Surface** (`#1E1B1C`), and **Muted Garnet Border** (`#3B3133`): Cohesive dark-mode surfaces preserving brand identity.
+One family, Schibsted Grotesk, in sentence case throughout. Page titles are 28–32px extra-bold with tight tracking; panel titles are 15px bold; body text is 14px. Fragment Mono appears only where the content is literally a code (MRN, ICD-10, `V-12`, `LAB-88`). Tables and definition lists use tabular figures.
 
-### Named Rules
-**The Clinical Semantics Rule.** Never reuse `#DC2011` (critical red) for ordinary buttons or decorative badges. Reserve `#DC2011` exclusively for clinical alerts, abnormal/critical lab flags, errors, and destructive actions. Keep confirmed/normal clinical status indicators (`#2F6B48` forest green, `#A16207` clinical amber) distinct from brand burgundy.
+## Shape and depth
 
-## Typography
-
-**Display Font:** `Newsreader` (serif) for page titles and patient record headers.
-**Body Font:** `IBM Plex Sans` for dense clinical tables, form controls, and SOAP notes.
-**Mono / Tabular Font:** `JetBrains Mono` with `font-variant-numeric: tabular-nums` for MRNs, ICD-10 codes, timestamps, vital signs, and record tags (`[V-1]`, `[SYM-2]`).
-
-## Layout
-
-- **Desktop:** Persistent `260px` Deep Burgundy (`#380F17`) navigation sidebar alongside a fluid workspace capped at `1280px` (`max-w-7xl`) on Alabaster Canvas (`#FAF8F5`).
-- **Mobile & Tablet (`< 1024px`):** Sidebar collapses cleanly into an accessible slide-over navigation drawer toggled from the top header bar.
-- **Breadcrumbs & Density:** Top bar displays hierarchical breadcrumbs (`Workspace / Section / Patient`) plus theme switcher and primary actions.
-
-## Elevation & Depth
-
-**The Flat-By-Default Rule.** Clinical record cards and tables use 1px structural borders (`#E7E1DA` / `#3B3133`) with zero ambient shadow. Shadows appear exclusively on floating overlays (`Modal` dialogs and the Citation Inspector Drawer).
-
-## Shapes
-
-- **Cards & Panels:** `12px` radius (`rounded-xl`).
-- **Inputs, Buttons & Citation Tags:** `8px`–`10px` radius (`rounded-lg`).
-- **Status Pills:** `9999px` full pill strictly for compact metadata badges.
+Radius encodes hierarchy: 4px on tags and citation chips, 8px on controls, 14px on panels. Panels are flat with 1px rules. Only floating layers (dialogs, the citation inspector, the command palette, tooltips) cast a shadow.
 
 ## Components
 
-Reusable primitives in `frontend/src/components/ui.tsx` govern `Button`, `Badge`, `Card`, `Input`, `Select`, `Textarea`, `Modal`, `EmptyState`, `SkeletonBlock`, and `AlertBanner`. Every control ships with consistent hover, `:focus-visible` ring (`2px solid #8F0B13`), disabled, loading, and validation error states.
+`frontend/src/components/`:
+- `ui.tsx`: Button, Tag, Panel, Input, Select, Textarea, Modal, Drawer, Notice, Empty, Skeleton, Tabs, PageHeader
+- `vitals.tsx`: EcgTrace (sign-in) and VitalsStrip (patient chart)
+- `charts.tsx`: BarList, MonthColumns, VisitMix
+- `citations.tsx`: citation chips and the source-row inspector drawer
+- `CommandPalette.tsx`: ⌘K / Ctrl K / `/` patient and command search
 
-## Do's and Don'ts
+## Rules
 
-- **Do** distinguish AI-synthesized output inside Warm Ivory (`#EFDFC5`) and Deep Burgundy (`#380F17`) containers from plain factual relational cards (`#FFFFFF`).
-- **Do** preserve `tabular-nums` on every numeric measurement, date, and identifier.
-- **Don't** introduce unrelated blue, purple, teal, or neon gradients anywhere in the UI.
-- **Don't** replace real clinical labels or empty states with placeholder numbers.
+- AI output always shows its receipt: how many citations matched stored rows, the grounding score, and the provider.
+- Every AI statement can be flagged for review, and every citation opens the stored row it points to.
+- Allergies stay visible on every chart tab.
+- Copy is plain and specific: "Register patient", "Save visit", "Nothing in the record matches".
+- Motion is limited to the ECG trace drawing once on sign-in and to transitions that answer an action (dialogs, drawer). Reduced-motion is respected.

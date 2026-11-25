@@ -1,385 +1,364 @@
-import React, { useEffect } from 'react';
-import { AlertTriangle, CheckCircle2, Info, Loader2, X } from 'lucide-react';
+import React, { ReactNode, useEffect, useId, useRef } from 'react';
+import { AlertTriangle, CheckCircle2, Loader2, X } from 'lucide-react';
+import { cx } from '../lib/format';
 
-export type ButtonVariant = 'primary' | 'brand' | 'secondary' | 'ivory' | 'danger' | 'ghost';
-export type ButtonSize = 'sm' | 'md' | 'lg';
+/* ------------------------------------------------------------------ Button */
+
+type ButtonTone = 'pen' | 'ink' | 'line' | 'quiet' | 'danger';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
+  tone?: ButtonTone;
+  size?: 'sm' | 'md';
   loading?: boolean;
+  icon?: ReactNode;
 }
 
-const BUTTON_VARIANTS: Record<ButtonVariant, string> = {
-  primary:
-    'bg-[#8F0B13] hover:bg-[#74080F] active:bg-[#5E060C] text-white border border-transparent',
-  brand:
-    'bg-[#380F17] hover:bg-[#4B1620] active:bg-[#2A0B11] text-[#EFDFC5] border border-transparent',
-  secondary:
-    'bg-surface hover:bg-surface-muted text-ink-primary border border-border-warm',
-  ivory:
-    'bg-[#EFDFC5] hover:bg-[#E7D1AE] text-[#380F17] border border-[#D4BD98]',
-  danger:
-    'bg-[#DC2011] hover:bg-[#B8190D] active:bg-[#99140A] text-white border border-transparent',
-  ghost:
-    'bg-transparent hover:bg-surface-muted text-ink-secondary hover:text-ink-primary border border-transparent',
-};
-
-const BUTTON_SIZES: Record<ButtonSize, string> = {
-  sm: 'px-3 py-1.5 text-xs rounded-lg gap-1.5',
-  md: 'px-4 py-2 text-xs rounded-lg gap-2',
-  lg: 'px-5 py-2.5 text-sm rounded-lg gap-2',
+const BUTTON_TONES: Record<ButtonTone, string> = {
+  pen: 'bg-pen text-white hover:bg-pen-strong dark:text-paper',
+  ink: 'bg-ink text-sheet hover:bg-ink/85',
+  line: 'border border-rule-strong bg-sheet text-ink hover:border-ink-3 hover:bg-well',
+  quiet: 'text-ink-2 hover:bg-well hover:text-ink',
+  danger: 'bg-trace text-white hover:bg-trace/90',
 };
 
 export function Button({
-  variant = 'primary',
+  tone = 'line',
   size = 'md',
   loading = false,
-  disabled,
-  className = '',
+  icon,
+  className,
   children,
+  disabled,
   type = 'button',
-  ...props
+  ...rest
 }: ButtonProps) {
   return (
     <button
       type={type}
       disabled={disabled || loading}
-      className={`inline-flex items-center justify-center font-semibold transition-colors duration-150 disabled:opacity-55 disabled:cursor-not-allowed ${BUTTON_VARIANTS[variant]} ${BUTTON_SIZES[size]} ${className}`}
-      {...props}
+      className={cx(
+        'inline-flex items-center justify-center gap-1.5 rounded-ctl font-semibold whitespace-nowrap transition-colors',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        size === 'sm' ? 'h-8 px-2.5 text-[0.8125rem]' : 'h-10 px-4 text-sm',
+        BUTTON_TONES[tone],
+        className,
+      )}
+      {...rest}
     >
-      {loading && <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" aria-hidden="true" />}
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : icon}
       {children}
     </button>
   );
 }
 
-export type BadgeVariant =
-  | 'brand'
-  | 'crimson'
-  | 'ivory'
-  | 'critical'
-  | 'warning'
-  | 'stable'
-  | 'neutral'
-  | 'mono';
+/* --------------------------------------------------------------------- Tag */
 
-const BADGE_VARIANTS: Record<BadgeVariant, string> = {
-  brand: 'bg-[#380F17] text-[#EFDFC5] border border-[#380F17]',
-  crimson: 'bg-[#8F0B13]/10 text-[#8F0B13] dark:text-[#FCA5A5] border border-[#8F0B13]/30',
-  ivory: 'bg-[#EFDFC5] text-[#380F17] border border-[#D7C19D]',
-  critical:
-    'bg-[var(--status-critical-bg)] text-[var(--status-critical-fg)] border border-[var(--status-critical-border)]',
-  warning:
-    'bg-[var(--status-warning-bg)] text-[var(--status-warning-fg)] border border-[var(--status-warning-border)]',
-  stable:
-    'bg-[var(--status-stable-bg)] text-[var(--status-stable-fg)] border border-[var(--status-stable-border)]',
-  neutral: 'bg-surface-muted text-ink-secondary border border-border-warm',
-  mono: 'bg-surface-muted text-ink-primary border border-border-warm font-mono tabular-nums',
+export type TagTone = 'neutral' | 'pen' | 'ok' | 'warn' | 'danger' | 'outline';
+
+const TAG_TONES: Record<TagTone, string> = {
+  neutral: 'bg-well text-ink-2',
+  pen: 'bg-pen-wash text-pen',
+  ok: 'bg-ok-wash text-ok',
+  warn: 'bg-warn-wash text-warn',
+  danger: 'bg-trace-wash text-trace',
+  outline: 'border border-rule-strong text-ink-2',
 };
 
-export function Badge({
-  variant = 'neutral',
-  className = '',
-  children,
-}: {
-  variant?: BadgeVariant;
-  className?: string;
-  children: React.ReactNode;
-}) {
+export function Tag({ tone = 'neutral', className, children }: { tone?: TagTone; className?: string; children: ReactNode }) {
   return (
-    <span
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold leading-tight ${BADGE_VARIANTS[variant]} ${className}`}
-    >
+    <span className={cx('inline-flex items-center gap-1 rounded-tag px-1.5 py-0.5 text-2xs font-semibold', TAG_TONES[tone], className)}>
       {children}
     </span>
   );
 }
 
-export function Card({
-  variant = 'default',
-  className = '',
+/** Maps a stored clinical status to the tag tone that signals it. */
+export function statusTone(status: string): TagTone {
+  const s = status.toLowerCase();
+  if (['critical', 'severe', 'life-threatening', 'high', 'low', 'abnormal', 'active'].includes(s)) return 'danger';
+  if (['provisional', 'moderate'].includes(s)) return 'warn';
+  if (['confirmed', 'controlled', 'resolved', 'normal', 'mild'].includes(s)) return 'ok';
+  return 'neutral';
+}
+
+/* ------------------------------------------------------------------- Panel */
+
+export function Panel({
+  title,
+  aside,
+  className,
+  bodyClassName,
   children,
+  as: Tag = 'section',
 }: {
-  variant?: 'default' | 'muted' | 'ivory' | 'brand';
+  title?: ReactNode;
+  aside?: ReactNode;
   className?: string;
-  children: React.ReactNode;
+  bodyClassName?: string;
+  children: ReactNode;
+  as?: 'section' | 'div' | 'article';
 }) {
-  const surfaceStyles: Record<'default' | 'muted' | 'ivory' | 'brand', string> = {
-    default: 'bg-surface border border-border-warm text-ink-primary',
-    muted: 'bg-surface-muted border border-border-warm text-ink-primary',
-    ivory: 'bg-surface-ivory border border-[#D7C19D] dark:border-[#5C443B] text-ink-primary',
-    brand: 'bg-[#380F17] border border-[#561925] text-[#FAF8F5]',
-  };
   return (
-    <div className={`rounded-xl ${surfaceStyles[variant]} ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-interface FieldWrapperProps {
-  id: string;
-  label: string;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  children: React.ReactNode;
-}
-
-function FieldWrapper({ id, label, required, hint, error, children }: FieldWrapperProps) {
-  return (
-    <div className="space-y-1">
-      <label htmlFor={id} className="block text-xs font-semibold text-ink-primary">
-        {label}
-        {required && <span className="text-[#DC2011] ml-0.5">*</span>}
-      </label>
-      {children}
-      {hint && !error && <p className="text-[11px] text-ink-muted">{hint}</p>}
-      {error && (
-        <p role="alert" className="text-[11px] font-medium text-[#DC2011]">
-          {error}
-        </p>
+    <Tag className={cx('rounded-panel border border-rule bg-sheet', className)}>
+      {(title || aside) && (
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-rule px-5 py-3">
+          {title && <h2 className="text-[0.9375rem] font-bold tracking-[-0.01em]">{title}</h2>}
+          {aside}
+        </header>
       )}
+      <div className={cx('p-5', bodyClassName)}>{children}</div>
+    </Tag>
+  );
+}
+
+/* ------------------------------------------------------------------ Fields */
+
+interface FieldShellProps {
+  id: string;
+  label?: string;
+  hint?: string;
+  required?: boolean;
+  children: ReactNode;
+}
+
+function FieldShell({ id, label, hint, required, children }: FieldShellProps) {
+  return (
+    <div className="min-w-0">
+      {label && (
+        <label htmlFor={id} className="mb-1 block text-[0.8125rem] font-semibold text-ink">
+          {label}
+          {required && <span className="text-trace"> *</span>}
+        </label>
+      )}
+      {children}
+      {hint && <p className="mt-1 text-2xs text-ink-3">{hint}</p>}
     </div>
   );
 }
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  id: string;
-  label?: string;
-  hint?: string;
-  error?: string;
-}
+const CONTROL =
+  'w-full rounded-ctl border border-rule-strong bg-sheet px-3 text-sm text-ink placeholder:text-ink-3 transition-colors hover:border-ink-3 focus:border-pen focus:outline-none focus:ring-2 focus:ring-pen/20 disabled:opacity-60';
 
-export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ id, label, hint, error, required, className = '', ...props }, ref) => {
-    const inputNode = (
-      <input
-        ref={ref}
-        id={id}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        className={`w-full px-3 py-2 rounded-lg border bg-surface text-ink-primary text-xs transition-colors placeholder:text-ink-muted ${
-          error ? 'border-[#DC2011]' : 'border-border-warm focus:border-[#8F0B13]'
-        } ${className}`}
-        {...props}
-      />
-    );
-    if (!label) return inputNode;
-    return (
-      <FieldWrapper id={id} label={label} required={required} hint={hint} error={error}>
-        {inputNode}
-      </FieldWrapper>
-    );
-  }
-);
-Input.displayName = 'Input';
+type InputProps = React.InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string };
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  id: string;
-  label?: string;
-  hint?: string;
-  error?: string;
-}
-
-export function Select({ id, label, hint, error, required, className = '', children, ...props }: SelectProps) {
-  const selectNode = (
-    <select
-      id={id}
-      required={required}
-      aria-invalid={error ? true : undefined}
-      className={`w-full px-3 py-2 rounded-lg border bg-surface text-ink-primary text-xs transition-colors ${
-        error ? 'border-[#DC2011]' : 'border-border-warm focus:border-[#8F0B13]'
-      } ${className}`}
-      {...props}
-    >
-      {children}
-    </select>
-  );
-  if (!label) return selectNode;
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(function Input(
+  { id, label, hint, required, className, ...rest },
+  ref,
+) {
+  const auto = useId();
+  const fieldId = id ?? auto;
   return (
-    <FieldWrapper id={id} label={label} required={required} hint={hint} error={error}>
-      {selectNode}
-    </FieldWrapper>
+    <FieldShell id={fieldId} label={label} hint={hint} required={required}>
+      <input ref={ref} id={fieldId} required={required} className={cx(CONTROL, 'h-10', className)} {...rest} />
+    </FieldShell>
   );
-}
+});
 
-interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
-  id: string;
-  label?: string;
-  hint?: string;
-  error?: string;
-}
+type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; hint?: string };
 
-export function Textarea({ id, label, hint, error, required, className = '', ...props }: TextareaProps) {
-  const node = (
-    <textarea
-      id={id}
-      required={required}
-      aria-invalid={error ? true : undefined}
-      className={`w-full px-3 py-2 rounded-lg border bg-surface text-ink-primary text-xs transition-colors placeholder:text-ink-muted ${
-        error ? 'border-[#DC2011]' : 'border-border-warm focus:border-[#8F0B13]'
-      } ${className}`}
-      {...props}
-    />
-  );
-  if (!label) return node;
+export function Select({ id, label, hint, required, className, children, ...rest }: SelectProps) {
+  const auto = useId();
+  const fieldId = id ?? auto;
   return (
-    <FieldWrapper id={id} label={label} required={required} hint={hint} error={error}>
-      {node}
-    </FieldWrapper>
+    <FieldShell id={fieldId} label={label} hint={hint} required={required}>
+      <select id={fieldId} required={required} className={cx(CONTROL, 'h-10 pr-8', className)} {...rest}>
+        {children}
+      </select>
+    </FieldShell>
   );
+}
+
+type TextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string; hint?: string };
+
+export function Textarea({ id, label, hint, required, className, ...rest }: TextareaProps) {
+  const auto = useId();
+  const fieldId = id ?? auto;
+  return (
+    <FieldShell id={fieldId} label={label} hint={hint} required={required}>
+      <textarea id={fieldId} required={required} className={cx(CONTROL, 'min-h-[96px] py-2 leading-relaxed', className)} {...rest} />
+    </FieldShell>
+  );
+}
+
+/* ------------------------------------------------------- Overlays & dialogs */
+
+function useEscape(open: boolean, onClose: () => void) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
 }
 
 export function Modal({
   open,
   onClose,
   title,
-  subtitle,
+  description,
   children,
-  footer,
-  maxWidth = 'max-w-xl',
+  width = 'max-w-2xl',
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
-  subtitle?: string;
-  children: React.ReactNode;
-  footer?: React.ReactNode;
-  maxWidth?: string;
+  description?: string;
+  children: ReactNode;
+  width?: string;
 }) {
+  useEscape(open, onClose);
+  const titleId = useId();
+  const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
-
+    if (open) ref.current?.querySelector<HTMLElement>('input, select, textarea, button')?.focus();
+  }, [open]);
   if (!open) return null;
-
   return (
     <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 bg-black/55 flex items-center justify-center p-4 overflow-y-auto"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-6"
+      onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className={`bg-surface border border-border-warm rounded-xl w-full ${maxWidth} shadow-2xl overflow-hidden my-auto`}>
-        <div className="px-6 py-4 border-b border-border-warm flex items-start justify-between gap-4 bg-surface-muted/50">
+      <div
+        ref={ref}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className={cx('flex max-h-[92vh] w-full flex-col rounded-t-panel border border-rule bg-sheet shadow-float animate-rise sm:rounded-panel', width)}
+      >
+        <header className="flex items-start justify-between gap-4 border-b border-rule px-6 py-4">
           <div>
-            <h3 className="font-serif text-xl font-semibold text-ink-primary leading-snug">{title}</h3>
-            {subtitle && <p className="text-xs text-ink-secondary mt-0.5">{subtitle}</p>}
+            <h2 id={titleId} className="text-lg font-bold tracking-[-0.015em]">{title}</h2>
+            {description && <p className="mt-0.5 text-[0.8125rem] text-ink-2">{description}</p>}
           </div>
-          <button
-            type="button"
-            aria-label={`Close ${title}`}
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-surface-muted transition-colors"
-          >
-            <X className="w-4 h-4" />
+          <button type="button" onClick={onClose} aria-label="Close dialog" className="rounded-ctl p-1.5 text-ink-3 hover:bg-well hover:text-ink">
+            <X className="h-4 w-4" />
           </button>
-        </div>
-        <div className="p-6 max-h-[75vh] overflow-y-auto">{children}</div>
-        {footer && (
-          <div className="px-6 py-3.5 border-t border-border-warm bg-surface-muted/40 flex items-center justify-end gap-2">
-            {footer}
-          </div>
-        )}
+        </header>
+        <div className="overflow-y-auto px-6 py-5">{children}</div>
       </div>
     </div>
   );
 }
 
-export function AlertBanner({
-  variant = 'error',
-  message,
-  onDismiss,
-  className = '',
+export function Drawer({
+  open,
+  onClose,
+  label,
+  children,
 }: {
-  variant?: 'error' | 'warning' | 'success' | 'ivory';
-  message: string;
-  onDismiss?: () => void;
-  className?: string;
+  open: boolean;
+  onClose: () => void;
+  label: string;
+  children: ReactNode;
 }) {
-  const styles = {
-    error:
-      'bg-[var(--status-critical-bg)] border-[var(--status-critical-border)] text-[var(--status-critical-fg)]',
-    warning:
-      'bg-[var(--status-warning-bg)] border-[var(--status-warning-border)] text-[var(--status-warning-fg)]',
-    success:
-      'bg-[var(--status-stable-bg)] border-[var(--status-stable-border)] text-[var(--status-stable-fg)]',
-    ivory: 'bg-surface-ivory border-[#D7C19D] dark:border-[#5C443B] text-ink-primary',
-  };
+  useEscape(open, onClose);
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-ink/25" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <aside role="dialog" aria-modal="true" aria-label={label} className="flex h-full w-full max-w-md flex-col border-l border-rule bg-sheet shadow-float animate-slidein">
+        {children}
+      </aside>
+    </div>
+  );
+}
 
-  const Icon =
-    variant === 'error'
-      ? AlertTriangle
-      : variant === 'success'
-      ? CheckCircle2
-      : variant === 'warning'
-      ? AlertTriangle
-      : Info;
+/* ------------------------------------------------------- Feedback & states */
 
+export function Notice({ tone, children, onDismiss }: { tone: 'ok' | 'error'; children: ReactNode; onDismiss?: () => void }) {
+  const Icon = tone === 'ok' ? CheckCircle2 : AlertTriangle;
   return (
     <div
-      role={variant === 'error' ? 'alert' : 'status'}
-      className={`p-3.5 rounded-xl border text-xs flex items-center justify-between gap-3 ${styles[variant]} ${className}`}
+      role={tone === 'error' ? 'alert' : 'status'}
+      className={cx(
+        'flex items-start gap-2.5 rounded-ctl border px-3.5 py-2.5 text-[0.8125rem] font-medium',
+        tone === 'ok' ? 'border-ok/25 bg-ok-wash text-ok' : 'border-trace/25 bg-trace-wash text-trace',
+      )}
     >
-      <div className="flex items-center gap-2.5">
-        <Icon className="w-4 h-4 shrink-0" aria-hidden="true" />
-        <span className="font-medium leading-relaxed">{message}</span>
-      </div>
+      <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+      <div className="flex-1">{children}</div>
       {onDismiss && (
-        <button
-          type="button"
-          aria-label="Dismiss notification"
-          onClick={onDismiss}
-          className="p-1 rounded-md hover:bg-black/10 transition-colors shrink-0"
-        >
-          <X className="w-4 h-4" />
+        <button type="button" onClick={onDismiss} aria-label="Dismiss message" className="opacity-70 hover:opacity-100">
+          <X className="h-4 w-4" />
         </button>
       )}
     </div>
   );
 }
 
-export function EmptyState({
+export function Empty({
   title,
-  description,
-  actionLabel,
-  onAction,
+  body,
+  action,
+  icon,
 }: {
   title: string;
-  description: string;
-  actionLabel?: string;
-  onAction?: () => void;
+  body?: string;
+  action?: ReactNode;
+  icon?: ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-dashed border-border-warm bg-surface p-8 text-center space-y-2.5">
-      <h3 className="text-sm font-semibold text-ink-primary">{title}</h3>
-      <p className="text-xs text-ink-secondary max-w-md mx-auto leading-relaxed">{description}</p>
-      {actionLabel && onAction && (
-        <div className="pt-1">
-          <Button variant="secondary" size="sm" onClick={onAction}>
-            {actionLabel}
-          </Button>
-        </div>
-      )}
+    <div className="flex flex-col items-center rounded-panel border border-dashed border-rule-strong px-6 py-12 text-center">
+      {icon && <div className="mb-3 text-ink-3">{icon}</div>}
+      <h3 className="text-[0.9375rem] font-bold">{title}</h3>
+      {body && <p className="mt-1 max-w-sm text-[0.8125rem] text-ink-2">{body}</p>}
+      {action && <div className="mt-4">{action}</div>}
     </div>
   );
 }
 
-export function SkeletonBlock({ className = 'h-24 w-full' }: { className?: string }) {
+export function Skeleton({ className }: { className?: string }) {
+  return <div className={cx('animate-pulse rounded-ctl bg-well', className)} aria-hidden />;
+}
+
+/* -------------------------------------------------------------------- Tabs */
+
+export function Tabs<T extends string>({
+  value,
+  onChange,
+  items,
+  label,
+}: {
+  value: T;
+  onChange: (v: T) => void;
+  items: { value: T; label: string; icon?: ReactNode; count?: number }[];
+  label: string;
+}) {
   return (
-    <div
-      aria-hidden="true"
-      className={`rounded-xl border border-border-warm bg-surface-muted/70 animate-pulse ${className}`}
-    />
+    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b border-rule">
+      {items.map((item) => {
+        const active = item.value === value;
+        return (
+          <button
+            key={item.value}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={() => onChange(item.value)}
+            className={cx(
+              '-mb-px flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold transition-colors',
+              active ? 'border-pen text-ink' : 'border-transparent text-ink-3 hover:text-ink',
+            )}
+          >
+            {item.icon}
+            {item.label}
+            {item.count !== undefined && <span className="code text-ink-3">{item.count}</span>}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- Headings */
+
+export function PageHeader({ title, lede, actions }: { title: string; lede?: string; actions?: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="max-w-2xl">
+        <h1 className="text-[1.75rem] font-extrabold leading-tight tracking-[-0.03em]">{title}</h1>
+        {lede && <p className="mt-1 text-ink-2">{lede}</p>}
+      </div>
+      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+    </div>
   );
 }

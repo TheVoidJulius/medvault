@@ -110,7 +110,57 @@ def get_dashboard_overview(
     )
     top_symptoms = [{"symptom": row.name, "count": row.cnt} for row in sym_rows]
 
+    visit_dates = [row[0] for row in db.query(Visit.visit_date).all()]
+    visits_by_month = []
+    if visit_dates:
+        latest = max(visit_dates)
+        year, month = latest.year, latest.month
+        months = []
+        for _ in range(12):
+            months.append((year, month))
+            month -= 1
+            if month == 0:
+                year, month = year - 1, 12
+        counts_by_month = {}
+        for d in visit_dates:
+            counts_by_month[(d.year, d.month)] = counts_by_month.get((d.year, d.month), 0) + 1
+        visits_by_month = [
+            {"month": f"{y}-{m:02d}", "count": counts_by_month.get((y, m), 0)} for y, m in reversed(months)
+        ]
+
+    type_rows = db.query(Visit.visit_type, func.count(Visit.id)).group_by(Visit.visit_type).all()
+    visit_type_mix = [{"visit_type": t, "count": n} for t, n in type_rows]
+
+    flagged_q = (
+        db.query(TestResult)
+        .options(joinedload(TestResult.visit).joinedload(Visit.patient))
+        .filter(TestResult.flag.in_(["Critical", "High", "Low", "Abnormal"]))
+        .order_by(TestResult.result_date.desc(), TestResult.id.desc())
+        .limit(8)
+        .all()
+    )
+    flagged_labs = [
+        {
+            "lab_id": t.id,
+            "lab_tag": f"LAB-{t.id}",
+            "visit_id": t.visit_id,
+            "patient_id": t.visit.patient_id,
+            "patient_name": f"{t.visit.patient.first_name} {t.visit.patient.last_name}",
+            "patient_mrn": t.visit.patient.mrn,
+            "test_name": t.test_name,
+            "value": t.value,
+            "unit": t.unit,
+            "reference_range": t.reference_range,
+            "flag": t.flag,
+            "result_date": t.result_date.isoformat(),
+        }
+        for t in flagged_q
+    ]
+
     return {
+        "visits_by_month": visits_by_month,
+        "visit_type_mix": visit_type_mix,
+        "flagged_labs": flagged_labs,
         "counts": {
             "total_patients": total_patients,
             "total_visits": total_visits,
