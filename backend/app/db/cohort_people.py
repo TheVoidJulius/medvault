@@ -255,19 +255,30 @@ REGIONS: List[Region] = [
         ),
     ),
     Region(
-        key="northeast",
+        key="assamese",
         weight=2,
-        male=("Bhaskar", "Pranjal", "Dhruba", "Rupam", "Pema", "Karma", "Lalthanzuala", "Thoiba"),
-        female=("Nilakshi", "Pallabi", "Rimjhim", "Dechen", "Lalrinpuii", "Bijoyalaxmi", "Sangita"),
-        surnames=("Bora", "Baruah", "Gogoi", "Saikia", "Kalita", "Hazarika", "Bhutia", "Tamang",
-                  "Lepcha", "Singha"),
+        male=("Bhaskar", "Pranjal", "Dhruba", "Rupam", "Hiranya", "Manab", "Jyotirmoy"),
+        female=("Nilakshi", "Pallabi", "Rimjhim", "Bornali", "Jahnavi", "Dipshikha"),
+        surnames=("Bora", "Baruah", "Gogoi", "Saikia", "Kalita", "Hazarika", "Phukan", "Deka"),
         localities=(
             ("Dispur", "Guwahati", "781006"),
             ("Ganeshguri", "Guwahati", "781005"),
             ("Na-Ali", "Jorhat", "785001"),
             ("Chowkidinghee", "Dibrugarh", "786001"),
+            ("Ketekibari", "Tezpur", "784001"),
+        ),
+    ),
+    Region(
+        key="sikkim_meghalaya",
+        weight=1,
+        male=("Pema", "Karma", "Sonam", "Tshering", "Ugen"),
+        female=("Dechen", "Yangchen", "Pemki", "Diki", "Ongmu"),
+        surnames=("Bhutia", "Lepcha", "Tamang", "Sherpa", "Gurung"),
+        localities=(
             ("Development Area", "Gangtok", "737101"),
+            ("Tadong", "Gangtok", "737102"),
             ("Laitumkhrah", "Shillong", "793003"),
+            ("Chowrasta", "Darjeeling", "734101"),
         ),
     ),
 ]
@@ -281,7 +292,6 @@ BUILDINGS = (
 
 RELATIONS_ADULT_MALE = ("Spouse", "Brother", "Father", "Son")
 RELATIONS_ADULT_FEMALE = ("Spouse", "Sister", "Mother", "Daughter", "Husband")
-RELATIONS_CHILD = ("Mother", "Father")
 
 # Mobile prefixes in the 6-9 series used by Indian operators
 MOBILE_LEADS = ("98", "99", "97", "96", "95", "94", "93", "91", "90", "89", "88", "87", "86",

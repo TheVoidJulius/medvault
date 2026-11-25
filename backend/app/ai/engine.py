@@ -45,6 +45,9 @@ STOPWORDS = {
     "is", "are", "was", "been", "any", "give", "me", "list", "summarise", "summarize",
     "tell", "about", "history", "record", "records", "visit", "visits", "mentioning",
     "consultations", "consultation", "particular", "condition", "similar",
+    # Question scaffolding that otherwise matches almost every record by substring ("low" in "follow-up")
+    "which", "who", "whom", "whose", "did", "does", "ever", "there", "their", "them", "they",
+    "cases", "case", "people", "anyone", "someone", "low", "high", "raised", "elevated", "new",
 }
 
 SYNONYM_MAP = {
@@ -68,6 +71,20 @@ SYNONYM_MAP = {
     "anemia": ["anemia", "hemoglobin", "ferritin", "iron", "fatigue", "pallor"],
     "kidney": ["renal", "creatinine", "egfr", "urea", "proteinuria"],
     "fever": ["fever", "pyrexia", "chills", "infection"],
+    "dengue": ["dengue", "ns1", "platelet", "retro-orbital"],
+    "platelets": ["platelet", "thrombocytopenia", "dengue"],
+    "tb": ["tuberculosis", "cbnaat", "afb", "hrze", "ni-kshay"],
+    "tuberculosis": ["tuberculosis", "cbnaat", "afb", "hrze", "ni-kshay"],
+    "typhoid": ["typhoid", "enteric fever", "salmonella", "widal"],
+    "malaria": ["malaria", "plasmodium", "vivax", "falciparum", "chloroquine"],
+    "chikungunya": ["chikungunya", "arthralgia"],
+    "pcos": ["polycystic ovary", "pcos", "myo-inositol", "irregular menstrual"],
+    "copd": ["chronic obstructive", "copd", "tiotropium", "fev1/fvc"],
+    "depression": ["depressive", "phq-9", "escitalopram", "low mood"],
+    "anxiety": ["anxiety", "palpitations", "clonazepam"],
+    "liver": ["fatty liver", "alt (sgpt)", "hepatitis", "ursodeoxycholic"],
+    "pregnancy": ["gestational", "antenatal", "primigravida", "ogtt"],
+    "knee": ["osteoarthritis of knee", "knee pain", "crepitus"],
 }
 
 
