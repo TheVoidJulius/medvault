@@ -306,7 +306,7 @@ def er_png(tables):
         core = name in ("patients", "visits")
         ax.add_patch(FancyBboxPatch((x - bw / 2, y - bh / 2), bw, bh, boxstyle="round,pad=0.01,rounding_size=0.05",
                                     fc="#E8ECFB" if core else "white", ec="#2340C8" if core else "#222222", lw=1.1, zorder=2))
-        ax.text(x, y, name, ha="center", va="center", fontsize=8, family="monospace", weight="bold" if core else "normal", zorder=3)
+        ax.text(x, y, name, ha="center", va="center", fontsize=6.8, family="monospace", weight="bold" if core else "normal", zorder=3)
     buf = io.BytesIO()
     fig.savefig(buf, format="png", bbox_inches="tight", facecolor="white")
     plt.close(fig)
@@ -655,13 +655,11 @@ def build(stats, tests, pages):
 
     # ---------- page 1: blank cover (filled in by the student)
     doc.add_paragraph()
-    first = doc.sections[0]
     for sec in doc.sections:
         sec.page_width, sec.page_height = Inches(8.27), Inches(11.69)
         sec.left_margin = sec.right_margin = sec.top_margin = sec.bottom_margin = Inches(1)
     body = doc.add_section(WD_SECTION.NEW_PAGE)
     body.footer.is_linked_to_previous = False
-    body.header.is_linked_to_previous = False
     fp = body.footer.paragraphs[0]
     fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
     field_run(fp, "PAGE")
@@ -670,8 +668,9 @@ def build(stats, tests, pages):
         r.font.name = BODY_FONT
     pg = OxmlElement("w:pgNumType")
     pg.set(qn("w:start"), "1")
-    body._sectPr.append(pg)
-    first.footer.is_linked_to_previous = True  # first section has no footer part of its own: stays empty
+    cols = body._sectPr.find(qn("w:cols"))
+    (cols.addprevious(pg) if cols is not None else body._sectPr.append(pg))
+    # the cover section (page 1) has no footer reference of its own, so it shows no page number
 
     s = stats
     real_note = f"{s['real']} real, de-identified patients" if s["real"] else f"{s['patients']} synthetic patients"
