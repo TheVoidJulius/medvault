@@ -715,6 +715,8 @@ describe('MedVault AI frontend', () => {
     fireEvent.click(within(allergyDialog).getByRole('button', { name: 'Record allergy' }));
     await waitFor(() => expect(within(main).getByText(/Allergy: Sulfa Drugs/)).toBeInTheDocument());
 
+    // The chart opens on Overview; visits live in their own tab.
+    fireEvent.click(within(main).getByRole('tab', { name: /Visits/ }));
     expect(within(main).getByText('Recurring throbbing unilateral headaches')).toBeInTheDocument();
     expect(within(main).getByText('Routine blood pressure follow-up')).toBeInTheDocument();
 
@@ -727,6 +729,16 @@ describe('MedVault AI frontend', () => {
     fireEvent.change(within(main).getByLabelText('Filter by visit type'), { target: { value: 'Follow-up' } });
     expect(within(main).queryByText('Recurring throbbing unilateral headaches')).not.toBeInTheDocument();
     expect(within(main).getByText('Routine blood pressure follow-up')).toBeInTheDocument();
+  });
+
+  it('groups lab results and medicines across visits', async () => {
+    await signInAsDoctor();
+    const main = await openAaravChart();
+    fireEvent.click(within(main).getByRole('tab', { name: /Lab results/ }));
+    expect(within(main).getByRole('columnheader', { name: 'Latest result' })).toBeInTheDocument();
+    expect(within(main).getAllByRole('row').length).toBeGreaterThan(1);
+    fireEvent.click(within(main).getByRole('tab', { name: /Medicines/ }));
+    expect(within(main).getByRole('columnheader', { name: 'Last dose and how often' })).toBeInTheDocument();
   });
 
   it('opens the cited source row from an AI summary and flags a statement', async () => {
@@ -769,6 +781,6 @@ describe('MedVault AI frontend', () => {
     await waitFor(() => expect(within(palette).getByText('Aarav Mehta')).toBeInTheDocument());
     fireEvent.keyDown(within(palette).getByLabelText('Search patients and commands'), { key: 'Enter' });
     await waitFor(() => expect(screen.getByRole('heading', { level: 1, name: 'Aarav Mehta' })).toBeInTheDocument());
-    expect(window.location.hash).toBe('#/patients/1/timeline');
+    expect(window.location.hash).toBe('#/patients/1/overview');
   });
 });

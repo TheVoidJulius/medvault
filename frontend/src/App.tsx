@@ -9,7 +9,7 @@ import { PatientDirectory } from './features/PatientDirectory';
 import { RegisterPatientModal } from './features/PatientForms';
 import { RecordSearch } from './features/RecordSearch';
 import { Shell } from './features/Shell';
-import { Landing } from './features/Landing';
+import { Landing } from './features/landing/Landing';
 import { SignIn } from './features/SignIn';
 import { createApi, errorText } from './lib/http';
 import type { Medication, PatientListItem, User } from './lib/types';
@@ -214,7 +214,7 @@ function MedVault() {
 
   return (
     <WorkspaceContext.Provider value={workspace}>
-      <CitationProvider onOpenVisit={(patientId, visitId) => navigate({ view: 'chart', patientId, tab: 'timeline', focusVisit: visitId })}>
+      <CitationProvider onOpenVisit={(patientId, visitId) => navigate({ view: 'chart', patientId, tab: 'visits', focusVisit: visitId })}>
         <Shell
           route={route}
           navigate={navigate}
@@ -256,7 +256,7 @@ function MedVault() {
             notify(`Registered ${p.first_name} ${p.last_name} as ${p.mrn}.`);
             reloadPatients();
             bumpRevision();
-            navigate({ view: 'chart', patientId: p.id, tab: 'timeline' });
+            navigate({ view: 'chart', patientId: p.id, tab: 'overview' });
           }}
         />
       </CitationProvider>

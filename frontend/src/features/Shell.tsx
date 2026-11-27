@@ -78,7 +78,7 @@ function Rail({
                 <li key={p.id}>
                   <button
                     type="button"
-                    onClick={() => go({ view: 'chart', patientId: p.id, tab: 'timeline' })}
+                    onClick={() => go({ view: 'chart', patientId: p.id, tab: 'overview' })}
                     className={cx(
                       'flex w-full items-center justify-between gap-2 rounded-ctl px-3 py-1.5 text-left text-[0.8125rem]',
                       active ? 'bg-sheet text-rail-ink shadow-[0_1px_0_rgb(var(--rule))]' : 'text-rail-ink/70 hover:bg-rail-ink/5 hover:text-rail-ink',

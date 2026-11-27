@@ -565,20 +565,26 @@ def build():
     # 4. Features with screenshots
     story += [P("4. The application, screen by screen", "h1"),
               P("Landing page", "h2"),
-              P("Visitors first see a public landing page: an engraved heart from Gray's Anatomy in blue ink, the three steps (store, summarise, "
-                "ask), a live count of indexed rows, and a table of what the database holds. It reads only totals from a public endpoint; "
-                "no patient row is shown before sign-in."),
-              *screenshot("00-landing.jpg", "Figure 6a. Landing page hero."),
+              P("Visitors first see a public landing page built around a real-time 3D heart (three.js). As the page scrolls through the three "
+                "steps (store, summarise, ask) the chrome heart turns matte white, then shrinks into the chest of a Gray's Anatomy torso while "
+                "blue ink spreads behind it; it can be dragged to rotate at any point. A live counter shows rows indexed, and a table lists what "
+                "the database holds. It reads only totals from a public endpoint; no patient row is shown before sign-in."),
+              *screenshot("00-landing.jpg", "Figure 6a. Landing page: step 1, the chrome heart."),
+              *screenshot("00b-landing-ask.jpg", "Figure 6b. Step 3: the heart settles into the chest as the ink spreads."),
               P("Sign in and overview", "h2"),
               P("Four demo accounts sit on the sign-in screen. After sign-in, the overview shows record counts, recent visits, "
                 "labs outside their range, visits per month, how patients were seen and the most common diagnoses and symptoms. "
                 "All of these numbers come from SQL <font name=Courier>COUNT</font> and <font name=Courier>GROUP BY</font> queries."),
               *screenshot("02-overview.jpg", "Figure 6. Overview for Dr. Ananya Sharma."),
               P("Patient chart", "h2"),
-              P("The chart opens with allergies (always visible), then the vitals strip: heart rate and blood pressure from every visit, "
-                "drawn on ECG chart paper with the normal range shaded and out-of-range readings in red. The timeline lists each visit with its "
-                "diagnoses (ruled-out ones struck through), symptoms, prescriptions, results, plan and SOAP note."),
-              *screenshot("04-chart-timeline.jpg", "Figure 7. Patient 10040025: heart failure over 18 visits. Older visits are collapsed to a one-line summary."),
+              P("Allergies stay visible above every tab. The chart is split into plain tabs so each kind of data is read in one place: "
+                "<b>Overview</b> (latest vitals marked normal or out of range, main conditions ranked by how many visits they appear in, the "
+                "latest visit in plain words, results to review, and the vitals strip), <b>Visits</b> (one row per visit; click to see its "
+                "diagnoses, medicines, results, vitals and note), <b>Lab results</b> (each test once, with latest value, normal range, trend "
+                "and full history), and <b>Medicines</b> (each drug once, with last dose and how often it was ordered)."),
+              *screenshot("04-chart-overview.jpg", "Figure 7. Patient 10040025 (heart failure, 18 visits): the Overview tab."),
+              *screenshot("04b-chart-visits.jpg", "Figure 7b. Visits tab: one row per visit; the open visit shows its diagnoses."),
+              *screenshot("04c-chart-labs.jpg", "Figure 7c. Lab results tab: creatinine across ten admissions, every one above range."),
               P("AI summary with citations", "h2"),
               P("The top line is a receipt: how many citations matched a stored record and the grounding score. Each tag opens "
                 "the stored row in a side drawer. Any statement can be flagged for a doctor to review."),
@@ -663,7 +669,7 @@ def build():
                   ["1", "Sign in as Dr. Ananya Sharma.", "Passwords are bcrypt-hashed; the session is a JWT kept in sessionStorage."],
                   ["2", "Point at the overview counts and charts.", "Every number here is a SQL COUNT or GROUP BY over the live tables."],
                   ["3", "Patients → search ‘heart failure’.", f"{st['real']} real de-identified hospital patients from MIMIC-IV; search covers name, MRN, condition and allergy."],
-                  ["4", "Open Patient 10040025.", "The vitals strip is drawn from 18 visits, with out-of-range readings in red. Older visits collapse to one line; click to expand."],
+                  ["4", "Open Patient 10040025.", "The vitals strip is drawn from 18 visits, with out-of-range readings in red. The Overview tab shows latest vitals, main conditions and results to review; Visits, Lab results and Medicines tabs show each kind of data in one table."],
                   ["5", "AI summary tab → click a citation tag → close → flag a line.", f"{st['demo_cites']} citations verified. The drawer shows the exact row. Doctors can flag anything doubtful."],
                   ["6", "Point at ‘Gaps and revisions in the record’.", "MIMIC has no blood group or contact number, and the AI says so instead of guessing."],
                   ["7", "Ask the records → ‘Which patients had heart failure?’, then ‘Find records mentioning Ebola’.", "Answers come with source rows. For Ebola it returns zero matches: no hallucination."],

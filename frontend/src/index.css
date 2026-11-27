@@ -79,7 +79,7 @@
     text-rendering: optimizeLegibility;
   }
   body {
-    @apply bg-paper text-ink font-sans text-[0.875rem] leading-[1.5];
+    @apply bg-paper text-ink font-sans text-[0.9375rem] leading-[1.55];
   }
   ::selection {
     @apply bg-pen text-white;

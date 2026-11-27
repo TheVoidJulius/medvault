@@ -79,7 +79,7 @@ export function Overview() {
                 {data.recent_visits.map((v) => (
                   <tr
                     key={v.visit_id}
-                    onClick={() => navigate({ view: 'chart', patientId: v.patient_id, tab: 'timeline', focusVisit: v.visit_id })}
+                    onClick={() => navigate({ view: 'chart', patientId: v.patient_id, tab: 'visits', focusVisit: v.visit_id })}
                     className="cursor-pointer border-b border-rule last:border-0 hover:bg-well"
                   >
                     <td className="px-5 py-3 align-top">
@@ -111,7 +111,7 @@ export function Overview() {
               <li key={l.lab_id} className="border-b border-rule last:border-0">
                 <button
                   type="button"
-                  onClick={() => navigate({ view: 'chart', patientId: l.patient_id, tab: 'timeline', focusVisit: l.visit_id })}
+                  onClick={() => navigate({ view: 'chart', patientId: l.patient_id, tab: 'visits', focusVisit: l.visit_id })}
                   className="flex w-full items-start justify-between gap-3 px-5 py-3 text-left hover:bg-well"
                 >
                   <span className="min-w-0">

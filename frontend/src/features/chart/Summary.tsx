@@ -204,7 +204,7 @@ export function Summary({ patient, stale }: { patient: PatientDetail; stale: num
                   <td className="whitespace-nowrap px-4 py-2.5">
                     <button
                       type="button"
-                      onClick={() => navigate({ view: 'chart', patientId: patient.id, tab: 'timeline', focusVisit: e.visit_id })}
+                      onClick={() => navigate({ view: 'chart', patientId: patient.id, tab: 'visits', focusVisit: e.visit_id })}
                       className="code text-pen hover:underline"
                     >
                       {e.visit_tag}

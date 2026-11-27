@@ -183,7 +183,7 @@ export function QueryPanel({ scopePatient, initialQuery, showScope = false }: { 
                         </span>
                         <button
                           type="button"
-                          onClick={() => navigate({ view: 'chart', patientId: r.patient_id, tab: 'timeline', focusVisit: r.visit_id ?? undefined })}
+                          onClick={() => navigate({ view: 'chart', patientId: r.patient_id, tab: 'visits', focusVisit: r.visit_id ?? undefined })}
                           className="inline-flex items-center gap-0.5 font-semibold text-pen hover:underline"
                         >
                           Open in chart <ArrowUpRight className="h-3 w-3" aria-hidden />

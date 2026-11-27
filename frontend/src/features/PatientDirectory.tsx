@@ -140,7 +140,7 @@ export function PatientDirectory() {
                   <td className="px-5 py-3 align-top">
                     <button
                       type="button"
-                      onClick={() => navigate({ view: 'chart', patientId: p.id, tab: 'timeline' })}
+                      onClick={() => navigate({ view: 'chart', patientId: p.id, tab: 'overview' })}
                       className="text-left font-semibold text-ink group-hover:text-pen"
                       aria-label={`Open chart for ${fullName(p)}`}
                     >

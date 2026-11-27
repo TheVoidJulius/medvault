@@ -2,7 +2,7 @@ import { createContext, useContext } from 'react';
 import type { Api } from './lib/http';
 import type { Medication, PatientListItem, User } from './lib/types';
 
-export type ChartTab = 'timeline' | 'summary' | 'ask' | 'new-visit';
+export type ChartTab = 'overview' | 'visits' | 'labs' | 'medicines' | 'summary' | 'ask' | 'new-visit';
 
 export type Route =
   | { view: 'overview' }
@@ -50,13 +50,15 @@ export function routeToHash(route: Route): string {
   }
 }
 
-const TABS: ChartTab[] = ['timeline', 'summary', 'ask', 'new-visit'];
+const TABS: ChartTab[] = ['overview', 'visits', 'labs', 'medicines', 'summary', 'ask', 'new-visit'];
 
 export function hashToRoute(hash: string): Route {
   const [path, query = ''] = hash.replace(/^#/, '').split('?');
   const parts = path.split('/').filter(Boolean);
   if (parts[0] === 'patients' && parts[1]) {
-    const tab = (TABS as string[]).includes(parts[2] ?? '') ? (parts[2] as ChartTab) : 'timeline';
+    // 'timeline' is the old name of the visits tab; keep old links working.
+    const raw = parts[2] === 'timeline' ? 'visits' : parts[2] ?? '';
+    const tab = (TABS as string[]).includes(raw) ? (raw as ChartTab) : 'overview';
     const visit = Number(new URLSearchParams(query).get('visit')) || undefined;
     return { view: 'chart', patientId: Number(parts[1]), tab, focusVisit: visit };
   }

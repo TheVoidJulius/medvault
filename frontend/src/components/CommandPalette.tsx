@@ -55,7 +55,7 @@ export function CommandPalette({
       label: fullName(p),
       hint: `${p.mrn}, ${ageFrom(p.date_of_birth)} y ${p.sex.toLowerCase()}, ${p.primary_conditions[0] ?? "no conditions recorded"}`,
       icon: <ClipboardList className="h-4 w-4" />,
-      run: go({ view: 'chart', patientId: p.id, tab: 'timeline' }),
+      run: go({ view: 'chart', patientId: p.id, tab: 'overview' }),
       keywords: `${fullName(p)} ${p.mrn} ${p.phone} ${p.primary_conditions.join(' ')}`.toLowerCase(),
     }));
     return [...actions, ...people];
