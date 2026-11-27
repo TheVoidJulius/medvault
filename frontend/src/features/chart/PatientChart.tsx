@@ -62,9 +62,12 @@ export function PatientChart({ patientId, tab, focusVisit }: { patientId: number
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
           <p className="code text-ink-3">{patient.mrn}</p>
-          <h1 className="mt-0.5 text-[2rem] font-extrabold leading-tight tracking-[-0.035em]">{fullName(patient)}</h1>
+          <h1 className="display mt-1 text-[2.75rem] leading-[0.95]">{fullName(patient)}</h1>
           <p className="mt-1 text-ink-2">
-            {ageFrom(patient.date_of_birth)} years, {patient.sex.toLowerCase()}, born {formatDate(patient.date_of_birth)}. Blood group{' '}
+            {lastVisit
+              ? `${ageFrom(patient.date_of_birth, new Date(lastVisit.visit_date))} years at last visit (${formatDate(lastVisit.visit_date, { day: undefined })})`
+              : `${ageFrom(patient.date_of_birth)} years`}
+            , {patient.sex.toLowerCase()}. Blood group{' '}
             {patient.blood_group ? <span className="code text-ink">{patient.blood_group}</span> : <span className="text-warn">not recorded</span>}.
           </p>
         </div>
@@ -172,7 +175,7 @@ export function PatientChart({ patientId, tab, focusVisit }: { patientId: number
             <dl className="mt-2 space-y-2 text-[0.8125rem]">
               <div>
                 <dt className="text-2xs text-ink-3">Mobile</dt>
-                <dd className="code text-[0.8125rem]">{patient.phone}</dd>
+                <dd className="code text-[0.8125rem]">{patient.phone || <span className="font-sans text-ink-3">Not recorded</span>}</dd>
               </div>
               {patient.email && (
                 <div>

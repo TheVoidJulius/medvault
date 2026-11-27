@@ -2,6 +2,7 @@ from datetime import date, datetime, timezone
 from sqlalchemy.orm import Session
 
 from app.core.security import get_password_hash
+from app.core.config import settings
 from app.db.cohort import seed_cohort
 from app.models import (
     Allergy,
@@ -93,6 +94,13 @@ def seed_database_if_empty(db: Session) -> dict:
     )
     db.add_all([doc_internal, doc_neuro, doc_pulmo])
     db.flush()
+
+    if settings.DATA_SOURCE == "mimic":
+        from app.db.mimic import seed_mimic
+
+        seed_mimic(db, {"internal": doc_internal, "neuro": doc_neuro, "pulmo": doc_pulmo})
+        db.commit()
+        return {"status": "seeded", "source": "mimic", "patients": db.query(Patient).count(), "visits": db.query(Visit).count()}
 
     # 3. Medications Catalog
     med_specs = [

@@ -52,6 +52,7 @@ from app.models import (
 ROOT = Path(__file__).resolve().parent.parent.parent
 OUT = ROOT / "docs" / "MedVault_AI_Project_Report.pdf"
 SHOTS = ROOT / "docs" / "screenshots"
+DEMO_MRN = "MIMIC-10040025"  # heart-failure patient with 18 visits, used in the walkthrough
 
 # Design tokens (see DESIGN.md)
 INK = colors.HexColor("#141A1F")
@@ -228,7 +229,7 @@ def user_flow_diagram():
         d.add(String(0, y, text, fontName="Helvetica-Bold", fontSize=7.5, fillColor=INK3))
 
     label(228, "Main path")
-    main = [("Sign in", "demo presets; bcrypt and JWT"), ("Overview", "counts, recent visits, out-of-range labs"),
+    main = [("Landing, then sign in", "public totals; demo presets, bcrypt and JWT"), ("Overview", "counts, recent visits, out-of-range labs"),
             ("Patients", "search, filter and sort all records"), ("Patient chart", "allergies, vitals strip, history, contact")]
     for i, (t, sub) in enumerate(main):
         box(d, xs[i], 178, bw, 44, t, sub, fill=PEN_WASH if i == 3 else (WELL if i == 0 else colors.white), edge=PEN if i == 3 else INK)
@@ -403,15 +404,10 @@ def gather_stats():
         )
         visit_types = db.query(Visit.visit_type, func.count(Visit.id)).group_by(Visit.visit_type).all()
         first, last = db.query(func.min(Visit.visit_date), func.max(Visit.visit_date)).one()
-        cities = {}
-        for (addr,) in db.query(Patient.address).all():
-            if addr:
-                city = addr.rsplit(",", 1)[-1].strip().rsplit(" ", 1)[0]
-                cities[city] = cities.get(city, 0) + 1
-        aarav = db.query(Patient).filter(Patient.mrn == "MRN-2026-00001").one()
-        vs = generate_patient_summary(db, aarav.id, force_refresh=True).validation_stats
+        demo = db.query(Patient).filter(Patient.mrn == DEMO_MRN).one()
+        vs = generate_patient_summary(db, demo.id, force_refresh=True).validation_stats
         return {
-            "aarav_cites": f"{vs['verified_citations']} of {vs['total_citations_emitted']}",
+            "demo_cites": f"{vs['verified_citations']} of {vs['total_citations_emitted']}",
             "patients": db.query(Patient).count(),
             "visits": db.query(Visit).count(),
             "doctors": db.query(Doctor).count(),
@@ -424,7 +420,7 @@ def gather_stats():
             "allergies": db.query(Allergy).count(),
             "medications": db.query(Medication).count(),
             "no_blood_group": db.query(Patient).filter(Patient.blood_group.is_(None)).count(),
-            "cities": len(cities),
+            "real": db.query(Patient).filter(Patient.is_synthetic == False).count(),  # noqa: E712
             "top_dx": top_dx,
             "visit_types": sorted(visit_types, key=lambda r: -r[1]),
             "span": (first.date(), last.date()),
@@ -501,7 +497,7 @@ def build():
               Spacer(1, 4),
               P(f"Visits span {span}. {st['abnormal_labs']} lab results are flagged outside their reference range, "
                 f"{st['allergies']} allergies are recorded, and {st['medications']} drugs are in the medication catalogue. "
-                "All patients are synthetic; none is a real person.", "small")]
+                "Patients are real but de-identified (MIMIC-IV demo, Beth Israel Deaconess Medical Center); no name, address or exact date is present.", "small")]
     story.append(PageBreak())
 
     # 2. Project flow
@@ -509,7 +505,7 @@ def build():
               P("2.1 System architecture", "h2"),
               P("The app is a single repository deployed to Vercel. The React frontend is built into static files; the FastAPI backend runs "
                 "as one Python serverless function behind <font name=Courier>/api/*</font>. On a cold start the backend creates the tables and "
-                "seeds the synthetic patients into SQLite."),
+                "seeds 100 real, de-identified patients from a compact file committed to the repository."),
               architecture_diagram(),
               P("Figure 1. Where each part runs and how a request travels.", "caption"),
               P("2.2 How a user moves through the app", "h2"),
@@ -568,6 +564,11 @@ def build():
 
     # 4. Features with screenshots
     story += [P("4. The application, screen by screen", "h1"),
+              P("Landing page", "h2"),
+              P("Visitors first see a public landing page: an engraved heart from Gray's Anatomy in blue ink, the three steps (store, summarise, "
+                "ask), a live count of indexed rows, and a table of what the database holds. It reads only totals from a public endpoint; "
+                "no patient row is shown before sign-in."),
+              *screenshot("00-landing.jpg", "Figure 6a. Landing page hero."),
               P("Sign in and overview", "h2"),
               P("Four demo accounts sit on the sign-in screen. After sign-in, the overview shows record counts, recent visits, "
                 "labs outside their range, visits per month, how patients were seen and the most common diagnoses and symptoms. "
@@ -577,14 +578,14 @@ def build():
               P("The chart opens with allergies (always visible), then the vitals strip: heart rate and blood pressure from every visit, "
                 "drawn on ECG chart paper with the normal range shaded and out-of-range readings in red. The timeline lists each visit with its "
                 "diagnoses (ruled-out ones struck through), symptoms, prescriptions, results, plan and SOAP note."),
-              *screenshot("04-chart-timeline.jpg", "Figure 7. Aarav Mehta’s chart: migraine storyline over four visits."),
+              *screenshot("04-chart-timeline.jpg", "Figure 7. Patient 10040025: heart failure over 18 visits. Older visits are collapsed to a one-line summary."),
               P("AI summary with citations", "h2"),
               P("The top line is a receipt: how many citations matched a stored record and the grounding score. Each tag opens "
                 "the stored row in a side drawer. Any statement can be flagged for a doctor to review."),
-              *screenshot("05-ai-summary.jpg", f"Figure 8. AI summary: {st['aarav_cites']} citations matched stored rows."),
+              *screenshot("05-ai-summary.jpg", f"Figure 8. AI summary: {st['demo_cites']} citations matched stored rows."),
               *screenshot("06-citation-inspector.jpg", "Figure 9. Clicking a tag opens the exact database row the AI used."),
               P("Missing data is reported, not guessed", "h2"),
-              *screenshot("07-data-gaps.jpg", "Figure 10. Zoya Farooqui has no blood group or emergency number on file, and the summary says so."),
+              *screenshot("07-data-gaps.jpg", "Figure 10. MIMIC holds no blood group or emergency contact, and the summary says so instead of guessing."),
               P("Ask the records", "h2"),
               *screenshot("08-ask-the-records.jpg", "Figure 11. A cohort-wide question: the answer on the left, ranked source rows on the right."),
               *screenshot("09-refusal.jpg", "Figure 12. Asked about something never recorded, it returns zero matches and says so."),
@@ -599,20 +600,22 @@ def build():
     # 5. Data
     dx_rows = [["Diagnosis", "Times recorded"]] + [[n, str(c)] for n, c in st["top_dx"]]
     vt_rows = [["Visit type", "Visits"]] + [[t, str(c)] for t, c in st["visit_types"]]
-    story += [P("5. The synthetic patient data", "h1"),
-              P(f"The database holds {st['patients']} fictional patients from {st['cities']} towns and cities. Six were written by hand "
-                "as detailed storylines (for example Aarav Mehta’s migraine and Zoya Farooqui’s rheumatoid arthritis with missing fields). "
-                "The rest come from a generator in <font name=Courier>backend/app/db/cohort.py</font> with a fixed random seed, so every "
-                "deployment gets exactly the same people."),
+    story += [P("5. The patient data", "h1"),
+              P(f"The database holds {st['real']} real, de-identified patients of Beth Israel Deaconess Medical Center in Boston, taken from the "
+                "<b>MIMIC-IV Clinical Database Demo</b> and <b>MIMIC-IV-ED Demo</b> (v2.2), published on PhysioNet by the MIT Laboratory for "
+                "Computational Physiology under the Open Database License. It is the standard open dataset for clinical AI research."),
               *bullets([
-                  "<b>Names fit their region.</b> A Telugu first name gets a Telugu surname and a Hyderabad or Vijayawada address with a real PIN code. "
-                  "Fourteen groups are covered, from Punjabi and Bengali to Malayali, Assamese and Sikkimese.",
-                  "<b>Conditions fit Indian OPDs.</b> 23 storylines: diabetes with hypertension, CKD, heart attack, fatty liver, TB on HRZE, dengue in the "
-                  "monsoon, typhoid, malaria, chikungunya, child diarrhoea, tonsillitis, UTI, thyroid, PCOS, anaemia, gestational diabetes, "
-                  "vitamin deficiency, asthma, COPD from cooking smoke, knee arthritis, acidity with H. pylori and depression.",
-                  "<b>Built to exercise the AI.</b> Symptoms recur across visits, diagnoses move from provisional to confirmed or ruled out, "
-                  "lab values trend (HbA1c falling, platelets dipping then recovering), and about 6% of patients have no blood group so the "
-                  f"gap detector has something to find ({st['no_blood_group']} right now).",
+                  "<b>What is real:</b> every admission and emergency visit, ICD-9 and ICD-10 discharge diagnoses, drug orders with dose and route, "
+                  "lab results with reference ranges, triage complaints, pain scores and vital signs.",
+                  "<b>What the publishers removed:</b> names, addresses, phone numbers and exact dates. Patients appear as their MIMIC subject number "
+                  "(for example Patient 10040025). MIMIC shifts each patient's dates into the future; MedVault moves them back into the patient's real "
+                  "year group, so dates are right to within about three years.",
+                  "<b>What the demo does not include:</b> allergies, blood group and free-text notes. Each visit's note is compiled from the coded rows "
+                  "and labelled as such; the AI reports the missing blood group and contact as gaps.",
+                  "<b>How it gets in:</b> <font name=Courier>backend/scripts/build_mimic_seed.py</font> converts the PhysioNet tables into "
+                  "<font name=Courier>backend/app/db/data/mimic_iv_demo.json.gz</font> (about 160 KB), which the app seeds from on first start. "
+                  "Per admission it keeps the top 8 diagnoses, up to 12 drug orders and the first result of up to 14 key lab tests.",
+                  "<b>Tests:</b> the automated test suite still uses hand-written synthetic storylines, so it can check exact expected answers.",
               ])]
     two = Table([[table(dx_rows, [72 * mm, 22 * mm], zebra=True), table(vt_rows, [42 * mm, 22 * mm], zebra=True)]],
                 colWidths=[100 * mm, CONTENT_W - 100 * mm])
@@ -626,7 +629,7 @@ def build():
                   ["Frontend", "React 18, TypeScript, Vite, Tailwind CSS", "Typed components, fast builds, design tokens for light and dark themes"],
                   ["Backend", "Python, FastAPI, Pydantic", "Request validation, automatic API docs at /docs, fast to write"],
                   ["Database", "SQLAlchemy ORM on SQLite", "Zero setup for evaluation; switching to PostgreSQL is a DATABASE_URL change"],
-                  ["AI", "Own grounded engine; optional Gemini", "Facts come from SQL; an LLM may only reword the overview, and only for synthetic records"],
+                  ["AI", "Own grounded engine; optional Gemini", "Facts come from SQL; an external LLM is off for real patient records unless explicitly allowed"],
                   ["Hosting", "Vercel", "Static frontend on CDN, backend as a serverless function"],
               ], [24 * mm, 56 * mm, CONTENT_W - 80 * mm], zebra=True),
               P("Security and privacy", "h2"),
@@ -635,7 +638,7 @@ def build():
                   "The token lives in sessionStorage, so it is cleared when the tab closes.",
                   "Role checks on write endpoints (doctor or admin).",
                   "Every sign-in, record change, AI summary and question is written to <font name=Courier>audit_logs</font>.",
-                  "All records are flagged <font name=Courier>is_synthetic</font>; external AI is only allowed for synthetic data unless explicitly enabled.",
+                  "Real records are flagged <font name=Courier>is_synthetic = false</font>, and no patient row is sent to an external AI service unless ALLOW_EXTERNAL_PHI is set.",
               ]),
               P("Tests and checks", "h2"),
               table([
@@ -643,10 +646,10 @@ def build():
                   ["Backend, pytest (7 tests)", "401 on missing or forged tokens; 422 on bad input; 404 on unknown IDs; dashboard counts update after a new visit; "
                    "summaries have a 1.0 grounding score, flag missing blood group and diagnostic revisions, and refresh after a new allergy; "
                    "retrieval finds headaches and refuses ‘Ebola’; note extraction finds symptom, diagnosis and drug"],
-                  ["Frontend, vitest (7 tests)", "Token stored only in sessionStorage; overview counts and theme toggle; patient search, filters and empty state; "
-                   "editing a profile and adding an allergy; citation drawer and flagging; record search with refusal; command palette navigation"],
+                  ["Frontend, vitest (8 tests)", "Landing page loads public totals and opens sign-in; token stored only in sessionStorage; overview counts and theme toggle; patient search, filters and empty state; "
+                   "editing a profile, adding an allergy and expanding a collapsed visit; citation drawer and flagging; record search with refusal; command palette navigation"],
                   ["Build", "TypeScript compiles with no errors; production bundle about 77 kB gzipped"],
-                  ["Whole cohort", f"All {st['patients']} AI summaries generated with every citation verified"],
+                  ["Real data", f"All {st['patients']} AI summaries on the real MIMIC patients generated with every citation verified"],
               ], [42 * mm, CONTENT_W - 42 * mm], zebra=True),
               Spacer(1, 4),
               P("Performance fix: questions across all patients loaded every child table in one joined query, which multiplied rows. Switching to "
@@ -659,12 +662,12 @@ def build():
                   ["Step", "Do this", "Say this"],
                   ["1", "Sign in as Dr. Ananya Sharma.", "Passwords are bcrypt-hashed; the session is a JWT kept in sessionStorage."],
                   ["2", "Point at the overview counts and charts.", "Every number here is a SQL COUNT or GROUP BY over the live tables."],
-                  ["3", "Patients → search ‘dengue’.", f"{st['patients']} synthetic Indian patients; search covers name, MRN, mobile, condition and allergy."],
-                  ["4", "Open Aarav Mehta (MRN-2026-00001).", "Allergy always on top. The vitals strip is drawn from his four visits. Tension headache was ruled out, then migraine confirmed."],
-                  ["5", "AI summary tab → click [SYM-1] → close → flag a line.", f"{st['aarav_cites']} citations verified. The drawer shows the exact row. Doctors can flag anything doubtful."],
-                  ["6", "Open Zoya Farooqui (MRN-2026-00006) → AI summary.", "Her blood group and emergency number are missing, and the AI reports that instead of guessing."],
-                  ["7", "Ask the records → a dengue question, then ‘Ebola’ for Aarav.", "Answers come with source rows. For Ebola it returns zero matches: no hallucination."],
-                  ["8", "Aarav → New visit → type a note → Extract from note.", "The note is parsed into symptom, diagnosis and drug rows for the doctor to check before saving."],
+                  ["3", "Patients → search ‘heart failure’.", f"{st['real']} real de-identified hospital patients from MIMIC-IV; search covers name, MRN, condition and allergy."],
+                  ["4", "Open Patient 10040025.", "The vitals strip is drawn from 18 visits, with out-of-range readings in red. Older visits collapse to one line; click to expand."],
+                  ["5", "AI summary tab → click a citation tag → close → flag a line.", f"{st['demo_cites']} citations verified. The drawer shows the exact row. Doctors can flag anything doubtful."],
+                  ["6", "Point at ‘Gaps and revisions in the record’.", "MIMIC has no blood group or contact number, and the AI says so instead of guessing."],
+                  ["7", "Ask the records → ‘Which patients had heart failure?’, then ‘Find records mentioning Ebola’.", "Answers come with source rows. For Ebola it returns zero matches: no hallucination."],
+                  ["8", "New visit → type a note → Extract from note.", "The note is parsed into symptom, diagnosis and drug rows for the doctor to check before saving."],
                   ["9", "Press Ctrl K; open Audit trail.", "Fast navigation; and every action is logged with who and when."],
               ], [11 * mm, 62 * mm, CONTENT_W - 73 * mm], zebra=True),
               Spacer(1, 6),
@@ -686,7 +689,9 @@ def build():
          "It reads date words (‘last two years’, ‘2026’), the kind of record asked about (diagnosis, drug, lab), removes filler words, expands "
          "medical synonyms (dengue → NS1, platelet), scores every stored row, and returns the top 25 with citations, or an explicit refusal."),
         ("Where is the data from?",
-         "It is synthetic. A seeded generator builds region-consistent Indian names and addresses and 23 clinical courses. No real patient data is used."),
+         "Real, de-identified patients of Beth Israel Deaconess Medical Center from the MIMIC-IV demo on PhysioNet, used under the Open Database "
+         "License with attribution. No identifiable data is present; the publishers removed names and shifted dates. Using a real hospital's live "
+         "records would need ethics approval and consent under India's DPDP Act."),
         ("What is ICD-10 and a SOAP note?",
          "ICD-10 is the WHO's code list for diseases (I10 is hypertension, A97.1 is dengue with warning signs). SOAP is the standard note format: "
          "Subjective (what the patient says), Objective (exam and vitals), Assessment (diagnosis), Plan (treatment)."),
@@ -694,7 +699,7 @@ def build():
          "Point DATABASE_URL at PostgreSQL, keep the existing indexes, add server-side pagination to the patient list, and move retrieval to "
          "full-text search or vector search. The API and UI would not need to change."),
         ("What are the limits?",
-         "Retrieval is keyword and synonym based, so it can miss unusual phrasing. Data is synthetic. There is no FHIR/HL7 export or imaging yet; "
+         "Retrieval is keyword and synonym based, so it can miss unusual phrasing. The dataset is a 100-patient demo, not the full MIMIC-IV (which needs credentialed access). There is no FHIR/HL7 export or imaging yet; "
          "those, plus vector search, are the next steps."),
     ]
     story += [P("8. Questions the examiner may ask", "h1")]
@@ -708,7 +713,8 @@ def build():
                   ["backend/app/models/__init__.py", "All 16 tables, relationships and CHECK constraints"],
                   ["backend/app/routers/", "auth, dashboard, patients and ai endpoints"],
                   ["backend/app/ai/engine.py", "Summary builder, citation validator, retrieval, note extraction"],
-                  ["backend/app/db/seed_data.py, cohort*.py", "Six hand-written storylines and the generated Indian cohort"],
+                  ["backend/app/db/mimic.py, data/", "Seeds the real MIMIC-IV patients; seed_data.py and cohort*.py hold the synthetic test data"],
+                  ["backend/scripts/build_mimic_seed.py", "Converts the PhysioNet tables into the committed seed file"],
                   ["frontend/src/features/", "Screens: sign-in, overview, patients, chart tabs, record search, audit"],
                   ["frontend/src/components/", "Design system, vitals strip, charts, citation drawer, command palette, logo"],
                   ["backend/tests, frontend/src/__tests__", "pytest and vitest suites"],

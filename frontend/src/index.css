@@ -11,62 +11,66 @@
 */
 :root {
   color-scheme: light;
-  --paper: 245 246 244;
-  --sheet: 255 255 255;
-  --well: 238 240 237;
-  --rule: 220 224 219;
-  --rule-strong: 195 201 194;
-  --ink: 20 26 31;
-  --ink-2: 71 81 90;
-  --ink-3: 104 114 123;
-  --pen: 35 64 200;
-  --pen-strong: 26 47 153;
-  --pen-wash: 232 236 251;
-  --trace: 196 32 50;
-  --trace-wash: 251 233 234;
-  --ok: 23 112 76;
-  --ok-wash: 228 242 235;
-  --warn: 150 86 0;
-  --warn-wash: 251 240 221;
-  --rail: 20 26 31;
-  --rail-ink: 216 222 228;
-  --rail-line: 44 53 61;
-  --grid: 236 178 172;
+  /* Cool lab grey with ultramarine ink, after anatomical plates printed in one colour.
+     Trace red stays reserved for clinical danger. */
+  --paper: 222 224 228;
+  --sheet: 244 245 246;
+  --well: 231 233 236;
+  --rule: 200 204 210;
+  --rule-strong: 166 171 179;
+  --ink: 17 19 23;
+  --ink-2: 62 67 75;
+  --ink-3: 94 100 109;
+  --pen: 31 53 198;
+  --pen-strong: 22 38 150;
+  --pen-wash: 225 229 249;
+  --trace: 190 30 48;
+  --trace-wash: 249 230 232;
+  --ok: 23 108 72;
+  --ok-wash: 223 239 231;
+  --warn: 146 84 0;
+  --warn-wash: 248 237 218;
+  --rail: 210 213 218;
+  --rail-ink: 17 19 23;
+  --rail-line: 186 190 197;
+  --grid: 31 53 198;
 
-  --series-1: #2340C8;
+  --series-1: #2E44D0;
   --series-2: #00A3A3;
   --series-3: #D9822B;
   --series-4: #9B4FC0;
+  --series-5: #5E8C31;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --paper: 13 17 21;
-  --sheet: 22 27 32;
-  --well: 29 35 42;
-  --rule: 42 50 58;
-  --rule-strong: 60 70 80;
-  --ink: 231 235 239;
-  --ink-2: 169 179 189;
-  --ink-3: 132 143 154;
-  --pen: 142 162 255;
-  --pen-strong: 182 196 255;
-  --pen-wash: 30 38 72;
+  --paper: 15 17 21;
+  --sheet: 23 26 31;
+  --well: 31 35 41;
+  --rule: 44 49 57;
+  --rule-strong: 64 71 81;
+  --ink: 232 234 238;
+  --ink-2: 172 178 188;
+  --ink-3: 134 141 152;
+  --pen: 123 141 242;
+  --pen-strong: 168 181 250;
+  --pen-wash: 30 37 74;
   --trace: 255 120 130;
   --trace-wash: 60 24 30;
   --ok: 94 208 156;
   --ok-wash: 18 46 36;
   --warn: 240 178 90;
   --warn-wash: 52 38 16;
-  --rail: 9 12 15;
-  --rail-ink: 200 208 216;
-  --rail-line: 34 42 50;
-  --grid: 120 52 60;
+  --rail: 11 13 16;
+  --rail-ink: 214 219 226;
+  --rail-line: 36 41 48;
+  --grid: 123 141 242;
 
-  --series-1: #6F86F5;
+  --series-1: #7B8DF2;
   --series-2: #14A8A6;
   --series-3: #D9822B;
   --series-4: #AE72D6;
+  --series-5: #7FA84E;
 }
 
 @layer base {
@@ -92,16 +96,22 @@
 }
 
 @layer components {
-  /* ECG chart paper: 1mm minor lines, 5mm major lines. The product's signature surface. */
+  /* Graph paper: 1mm minor lines, 5mm major lines, in faint ink. Behind the vitals strip. */
   .ecg-paper {
     background-color: rgb(var(--sheet));
     background-image:
-      linear-gradient(rgb(var(--grid) / 0.55) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(var(--grid) / 0.55) 1px, transparent 1px),
-      linear-gradient(rgb(var(--grid) / 0.22) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(var(--grid) / 0.22) 1px, transparent 1px);
+      linear-gradient(rgb(var(--grid) / 0.16) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid) / 0.16) 1px, transparent 1px),
+      linear-gradient(rgb(var(--grid) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid) / 0.06) 1px, transparent 1px);
     background-size: 25px 25px, 25px 25px, 5px 5px, 5px 5px;
     background-position: -1px -1px;
+  }
+  /* Condensed display face for page and section titles. */
+  .display {
+    font-stretch: 72%;
+    font-weight: 800;
+    letter-spacing: -0.015em;
   }
   .code {
     @apply font-mono text-[0.75rem] tracking-[-0.01em];

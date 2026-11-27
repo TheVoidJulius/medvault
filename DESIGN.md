@@ -1,19 +1,16 @@
 ---
-name: MedVault AI — Chart Paper
-description: Clinical workspace built from ward materials (ECG chart paper, graphite case-sheet ink, the blue ballpoint prescriptions are signed with), with trace red reserved for danger.
+name: MedVault AI — Anatomical Plate
+description: Cool lab grey with one ultramarine ink, after anatomical plates printed in a single colour; condensed headlines, monospace annotations, trace red reserved for danger.
 colors:
-  paper: "#F5F6F4"
-  sheet: "#FFFFFF"
-  ink: "#141A1F"
-  pen: "#2340C8"
-  trace: "#C42032"
-  grid: "#ECB2AC"
-  ok: "#17704C"
-  warn: "#965600"
-  rail: "#141A1F"
+  paper: "#DEE0E4"
+  sheet: "#F4F5F6"
+  ink: "#111317"
+  pen: "#1F35C6"
+  trace: "#BE1E30"
+  landing-canvas: "#B4B7BD"
 typography:
-  ui: "Schibsted Grotesk, 400-800"
-  codes: "Fragment Mono (MRNs, ICD-10 codes, record tags, vitals only)"
+  ui: "Archivo (variable width 62–125; body at 100, headlines condensed at 72%)"
+  labels: "IBM Plex Mono (annotations, codes, record tags)"
 rounded:
   tag: "4px"
   control: "8px"
@@ -22,9 +19,11 @@ rounded:
 
 # MedVault AI design system
 
+> Revised: the landing page and app now share an anatomical-plate look. Gray's Anatomy (1918, public domain) engravings recoloured to ultramarine ink sit on a cool grey canvas, with condensed Archivo headlines and IBM Plex Mono annotations. The vitals strip keeps its graph paper, now in faint ink instead of ECG pink.
+
 ## Idea
 
-The interface uses what Indian clinicians already work with. ECG chart paper, with its rose millimetre grid, is the one signature surface. It appears on the sign-in hero and behind each patient's vitals strip, where heart rate and blood pressure are plotted from their recorded visits. Everything else is quiet: neutral paper, graphite ink, hairline rules.
+The look comes from printed anatomical plates: one ultramarine ink on grey paper. Engravings of the heart and torso carry the landing page, where tiny monospace annotations label them like a lab specimen and a blue ink blob grows as you scroll. Inside the app the same palette stays quiet: grey paper, white panels, hairline rules, and ultramarine only for actions and citations. Graph paper sits behind each patient's vitals strip, where heart rate and blood pressure are plotted from their recorded visits.
 
 ## Colour roles
 

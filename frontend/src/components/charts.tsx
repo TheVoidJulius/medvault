@@ -78,8 +78,9 @@ export function MonthColumns({ rows }: { rows: { month: string; count: number }[
   );
 }
 
-const SERIES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)'];
-const VISIT_TYPE_ORDER = ['Follow-up', 'OPD', 'Emergency', 'Telehealth'];
+const SERIES = ['var(--series-1)', 'var(--series-2)', 'var(--series-3)', 'var(--series-4)', 'var(--series-5)'];
+// Colour follows the visit type and stays fixed; types with no visits simply take no space.
+const VISIT_TYPE_ORDER = ['Emergency', 'Inpatient', 'OPD', 'Follow-up', 'Telehealth'];
 
 /** Share of visits by type. Colour follows the visit type, never its rank, so it stays stable across data. */
 export function VisitMix({ rows }: { rows: { visit_type: string; count: number }[] }) {
@@ -95,9 +96,9 @@ export function VisitMix({ rows }: { rows: { visit_type: string; count: number }
         )}
       </div>
       <ul className="mt-3 space-y-1.5 text-[0.8125rem]">
-        {ordered.map((r, i) => (
+        {ordered.filter((r) => r.count > 0).map((r) => (
           <li key={r.type} className="flex items-center gap-2">
-            <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: SERIES[i] }} aria-hidden />
+            <span className="h-2.5 w-2.5 shrink-0 rounded-[3px]" style={{ background: SERIES[VISIT_TYPE_ORDER.indexOf(r.type)] }} aria-hidden />
             <span className="text-ink-2">{r.type}</span>
             <span className="code ml-auto text-ink">{Math.round((r.count / total) * 100)}%</span>
           </li>

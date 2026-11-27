@@ -88,6 +88,14 @@ SYNONYM_MAP = {
 }
 
 
+def icd_system(code: str) -> str:
+    """Label a stored code as ICD-9 or ICD-10. MIMIC admissions before late 2015 use ICD-9 (e.g. 401.9, V70.7, E879.0)."""
+    c = code.strip().upper()
+    if c[:1].isdigit() or (c.startswith("V") and c[1:3].isdigit()) or (c.startswith("E") and c[1:4].isdigit()):
+        return "ICD-9"
+    return "ICD-10"
+
+
 def load_full_patient(db: Session, patient_id: int) -> Optional[Patient]:
     return (
         db.query(Patient)
@@ -389,7 +397,7 @@ def generate_patient_summary(
         latest_dx, latest_v = dx_list[-1]
         first_dx, first_v = dx_list[0]
         cits = [f"DX-{d.id}" for d, _ in dx_list]
-        code_txt = f" (ICD-10: {latest_dx.icd10_code})" if latest_dx.icd10_code else ""
+        code_txt = f" ({icd_system(latest_dx.icd10_code)}: {latest_dx.icd10_code})" if latest_dx.icd10_code else ""
         statuses = [d.status for d, _ in dx_list]
         if len(dx_list) > 1:
             active_and_past_diagnoses.append(
@@ -843,10 +851,24 @@ def answer_natural_language_query(
     citation_index: Dict[str, CitationRef] = {}
     candidate_cards: List[RetrievedRecordCard] = []
 
-    def score_text(text_blob: str, record_type: str) -> Tuple[float, List[str]]:
+    keywords = parsed["extracted_keywords"]
+    phrases = [f"{a} {b}" for a, b in zip(keywords, keywords[1:])]
+    q_words = set(re.findall(r"[a-z]+", query.lower()))
+    wanted_flags = {f for f, words in (("High", {"high", "raised", "elevated"}), ("Low", {"low", "decreased"}),
+                                        ("Critical", {"critical"}), ("Abnormal", {"abnormal"})) if words & q_words}
+
+    def score_text(text_blob: str, record_type: str, flag: Optional[str] = None, context: str = "") -> Tuple[float, List[str]]:
+        """Score one record. `context` is text borrowed from the parent visit (its chief complaint):
+        it can make a record match, but only weakly, so a drug given during a heart-failure admission
+        never outranks the heart-failure diagnosis itself."""
         blob_lower = text_blob.lower()
+        context_lower = context.lower()
         matched: List[str] = []
         score = 0.0
+        # Exact multi-word phrases from the question ("heart failure") outrank scattered single-word hits.
+        score += 10.0 * sum(1 for ph in phrases if ph in blob_lower)
+        if flag and flag in wanted_flags:
+            score += 6.0
 
         if "All" in target_types or record_type in target_types:
             score += 2.0
@@ -855,7 +877,11 @@ def answer_natural_language_query(
             for term in clinical_terms:
                 if term in blob_lower:
                     matched.append(term)
-                    score += 4.5
+                    # Words the clinician typed count more than synonyms added by expansion.
+                    score += 6.0 if term in keywords else 2.0
+                elif term in context_lower:
+                    matched.append(term)
+                    score += 1.0
             if not matched:
                 return 0.0, []
         else:
@@ -905,8 +931,8 @@ def answer_natural_language_query(
             # Check Symptoms
             for s in v.symptoms:
                 tag = f"SYM-{s.id}"
-                blob = f"{s.name} {s.severity} {s.notes or ''} {v.chief_complaint}"
-                sc, matched = score_text(blob, "Symptom")
+                blob = f"{s.name} {s.severity} {s.notes or ''}"
+                sc, matched = score_text(blob, "Symptom", context=v.chief_complaint)
                 if sc > 0:
                     candidate_cards.append(
                         RetrievedRecordCard(
@@ -954,8 +980,8 @@ def answer_natural_language_query(
             for p in v.prescriptions:
                 tag = f"RX-{p.id}"
                 med_str = f"{p.medication.name} {p.medication.generic_name} {p.medication.strength} {p.medication.drug_class or ''}" if p.medication else ""
-                blob = f"{med_str} {p.dosage} {p.frequency} {p.instructions or ''} {v.chief_complaint}"
-                sc, matched = score_text(blob, "Prescription")
+                blob = f"{med_str} {p.dosage} {p.frequency} {p.instructions or ''}"
+                sc, matched = score_text(blob, "Prescription", context=v.chief_complaint)
                 if sc > 0:
                     med_title = f"{p.medication.name} {p.medication.strength}" if p.medication else "Medication"
                     candidate_cards.append(
@@ -980,7 +1006,7 @@ def answer_natural_language_query(
             for t in v.test_results:
                 tag = f"LAB-{t.id}"
                 blob = f"{t.test_name} {t.value} {t.unit or ''} {t.flag} {t.remarks or ''}"
-                sc, matched = score_text(blob, "TestResult")
+                sc, matched = score_text(blob, "TestResult", t.flag)
                 if sc > 0:
                     candidate_cards.append(
                         RetrievedRecordCard(

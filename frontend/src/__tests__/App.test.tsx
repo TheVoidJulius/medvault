@@ -599,6 +599,14 @@ function createMockFetch() {
       });
     }
 
+    if (url.pathname === '/api/dashboard/public') {
+      return jsonResponse({
+        patients: 8, real_patients: 8, visits: 24, emergency_visits: 10, diagnoses: 18, distinct_conditions: 12,
+        prescriptions: 21, lab_results: 20, abnormal_labs: 6, symptoms: 9, notes: 19, first_year: 2012, last_year: 2021,
+        source: { name: 'MIMIC-IV Clinical Database Demo v2.2', institution: 'Beth Israel Deaconess Medical Center, Boston', license: 'Open Database License (ODbL)', url: 'https://physionet.org/content/mimic-iv-demo/2.2/' },
+      });
+    }
+
     if (url.pathname === '/api/auth/audit-logs') {
       return jsonResponse([]);
     }
@@ -608,7 +616,7 @@ function createMockFetch() {
 }
 
 async function signInAsDoctor() {
-  window.location.hash = '';
+  window.location.hash = '#/sign-in';
   render(<App />);
   fireEvent.click(screen.getByRole('button', { name: /Dr\. Ananya Sharma, MD/ }));
   fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
@@ -634,6 +642,17 @@ describe('MedVault AI frontend', () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it('shows the landing page to visitors and opens sign-in from it', async () => {
+    window.location.hash = '';
+    render(<App />);
+    expect(screen.getByRole('heading', { name: /Every record, read back with its sources/i })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('real patients')).toBeInTheDocument());
+    expect(screen.getAllByText('Beth Israel Deaconess Medical Center, Boston', { exact: false }).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getAllByRole('button', { name: /Open the records/i })[0]);
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(window.location.hash).toBe('#/sign-in');
   });
 
   it('keeps the session token in sessionStorage only', async () => {
@@ -698,6 +717,13 @@ describe('MedVault AI frontend', () => {
 
     expect(within(main).getByText('Recurring throbbing unilateral headaches')).toBeInTheDocument();
     expect(within(main).getByText('Routine blood pressure follow-up')).toBeInTheDocument();
+
+    // Older visits start collapsed to a one-line summary and expand on click.
+    const older = within(main).getByRole('button', { name: /Expand visit V-\d+: Routine blood pressure follow-up/ });
+    expect(older).toHaveAttribute('aria-expanded', 'false');
+    fireEvent.click(older);
+    expect(within(main).getByRole('button', { name: /Collapse visit V-\d+: Routine blood pressure follow-up/ })).toHaveAttribute('aria-expanded', 'true');
+
     fireEvent.change(within(main).getByLabelText('Filter by visit type'), { target: { value: 'Follow-up' } });
     expect(within(main).queryByText('Recurring throbbing unilateral headaches')).not.toBeInTheDocument();
     expect(within(main).getByText('Routine blood pressure follow-up')).toBeInTheDocument();

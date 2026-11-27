@@ -19,9 +19,10 @@ Medical teams accumulate longitudinal patient records across outpatient visits, 
 - **Grounded AI Synthesis & Retrieval:** One-click patient summaries with 100% citation validation, explicit missing/conflicting data detection, per-claim review flagging, clickable source inspection drawer, and natural-language retrieval that refuses to extrapolate unrecorded facts.
 
 - **Fast navigation:** Command palette (Ctrl K / ⌘K or `/`) to jump to any patient by name, MRN or condition; shareable URLs for every chart tab.
-- **Realistic Indian cohort:** 162 synthetic patients across 14 linguistic regions and 23 common OPD storylines (see README).
+- **Public landing page:** explains the product with live database totals before sign-in; no patient rows are public.
+- **Real de-identified data:** 100 patients from the MIMIC-IV demo (Beth Israel Deaconess Medical Center, ODbL). A synthetic Indian cohort remains available with `DATA_SOURCE=synthetic`.
 
 ## Privacy & Clinical Safety Principles
-- Sandbox deployments store synthetic de-identified storylines (`is_synthetic = true`).
+- The default dataset is de-identified research data (MIMIC-IV demo), flagged `is_synthetic = false`; no patient row is sent to an external AI service unless `ALLOW_EXTERNAL_PHI` is set.
 - Auth session credentials live in `sessionStorage` rather than persistent storage and clear on logout.
 - Every AI-generated panel carries a prominent clinical decision-support notice separating AI synthesis from stored records.

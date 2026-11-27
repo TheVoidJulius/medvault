@@ -70,7 +70,7 @@ CREATE TABLE visits (
     doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE RESTRICT,
     visit_date TIMESTAMPTZ NOT NULL,
     visit_type VARCHAR(40) NOT NULL DEFAULT 'OPD'
-        CHECK (visit_type IN ('OPD', 'Follow-up', 'Emergency', 'Telehealth')),
+        CHECK (visit_type IN ('OPD', 'Follow-up', 'Emergency', 'Telehealth', 'Inpatient')),
     chief_complaint VARCHAR(255) NOT NULL,
     vitals_bp VARCHAR(30),
     vitals_hr INTEGER CHECK (vitals_hr IS NULL OR (vitals_hr >= 20 AND vitals_hr <= 300)),

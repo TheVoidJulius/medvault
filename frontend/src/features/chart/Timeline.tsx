@@ -33,12 +33,28 @@ function Section({ icon, title, children }: { icon: JSX.Element; title: string; 
   );
 }
 
-function VisitEntry({ visit, highlighted, onEdit }: { visit: Visit; highlighted: boolean; onEdit: () => void }) {
+function VisitEntry({
+  visit,
+  highlighted,
+  defaultOpen,
+  onEdit,
+}: {
+  visit: Visit;
+  highlighted: boolean;
+  defaultOpen: boolean;
+  onEdit: () => void;
+}) {
   const ref = useRef<HTMLElement>(null);
   const [notesOpen, setNotesOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen || highlighted);
   useEffect(() => {
-    if (highlighted) ref.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    if (highlighted) {
+      setOpen(true);
+      ref.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+    }
   }, [highlighted]);
+  const abnormal = visit.test_results.filter((t) => t.flag !== 'Normal').length;
+  const lead = visit.diagnoses.find((d) => d.status !== 'Ruled-out');
 
   return (
     <article
@@ -48,20 +64,43 @@ function VisitEntry({ visit, highlighted, onEdit }: { visit: Visit; highlighted:
         highlighted ? 'border-pen shadow-[0_0_0_3px_rgb(var(--pen)/0.15)]' : 'border-rule',
       )}
     >
-      <header className="flex items-start justify-between gap-3 border-b border-rule px-5 py-3.5">
-        <div className="min-w-0">
+      <header className={cx('flex items-start justify-between gap-3 px-5 py-3.5', open && 'border-b border-rule')}>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-label={`${open ? 'Collapse' : 'Expand'} visit V-${visit.id}: ${visit.chief_complaint}`}
+          className="min-w-0 flex-1 text-left"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <span className="code text-pen">V-{visit.id}</span>
             <Tag tone={visit.visit_type === 'Emergency' ? 'danger' : 'outline'}>{visit.visit_type}</Tag>
             <span className="text-[0.8125rem] text-ink-3">{visit.doctor_name}</span>
           </div>
           <h3 className="mt-1 text-[0.9375rem] font-bold leading-snug">{visit.chief_complaint}</h3>
-        </div>
+          {!open && (
+            <p className="mt-1 text-[0.8125rem] text-ink-2">
+              {lead ? lead.condition_name : 'No diagnosis recorded'}
+              <span className="text-ink-3">
+                {' '}
+                ({visit.diagnoses.length} {visit.diagnoses.length === 1 ? 'diagnosis' : 'diagnoses'}, {visit.prescriptions.length} drugs, {visit.test_results.length} results
+                {abnormal ? (
+                  <>
+                    , <span className="text-trace">{abnormal} out of range</span>
+                  </>
+                ) : null}
+                )
+              </span>
+            </p>
+          )}
+        </button>
         <Button size="sm" tone="quiet" className="shrink-0" onClick={onEdit} icon={<Pencil className="h-3.5 w-3.5" />}>
           Edit
         </Button>
       </header>
 
+      {open && (
+      <>
       <div className="grid gap-x-6 gap-y-4 px-5 py-4 md:grid-cols-2">
         {visit.diagnoses.length > 0 && (
           <Section icon={<Stethoscope className="h-3.5 w-3.5" />} title="Diagnoses">
@@ -160,6 +199,8 @@ function VisitEntry({ visit, highlighted, onEdit }: { visit: Visit; highlighted:
           )}
         </footer>
       )}
+      </>
+      )}
     </article>
   );
 }
@@ -226,7 +267,7 @@ export function Timeline({
               <time dateTime={v.visit_date} className="mb-1 block text-[0.8125rem] font-semibold text-ink-2 sm:absolute sm:-left-[8.5rem] sm:top-4 sm:mb-0 sm:w-24 sm:text-right">
                 {formatDate(v.visit_date)}
               </time>
-              <VisitEntry visit={v} highlighted={focusVisit === v.id} onEdit={() => setEditing(v)} />
+              <VisitEntry visit={v} highlighted={focusVisit === v.id} defaultOpen={v.id === visits[0]?.id && !focusVisit} onEdit={() => setEditing(v)} />
             </li>
           ))}
         </ol>

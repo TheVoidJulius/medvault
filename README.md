@@ -66,17 +66,18 @@ Every doctor account uses the password `Doctor@123`. The admin account uses `Adm
 | Doctor | Dr. Vivek Patil, MS (Orthopaedics) | `dr.patil@medvault.edu` |
 | Admin | Pushkar Panwar (System Admin) | `admin@medvault.edu` |
 
-The sign-in screen offers four of these as one-click presets.
+Visitors first see the public landing page; **Open the records** leads to sign-in, which offers four of these accounts as one-click presets.
 
-## Synthetic Patient Data
+## Patient Data: real, de-identified hospital records
 
-The database seeds 162 synthetic patients and about 400 visits on first start:
+MedVault seeds **100 real patients** of Beth Israel Deaconess Medical Center (Boston) from the **MIMIC-IV Clinical Database Demo** and **MIMIC-IV-ED Demo** (v2.2), published on PhysioNet under the Open Database License. This gives 325 visits, 2,253 ICD-9/ICD-10 diagnoses, 2,934 drug orders and about 3,400 lab results.
 
-- **6 hand-written storylines** (`backend/app/db/seed_data.py`): Aarav Mehta's migraine, Meera Krishnan's diabetes, and four others. The tests rely on these.
-- **156 generated patients** (`backend/app/db/cohort*.py`): deterministic (fixed seed), so every deployment gets the same people. Names, surnames, localities and PIN codes come from matching regions: North Indian, Punjabi, Bengali, Tamil, Telugu, Kannada, Malayali, Marathi, Gujarati, Urdu-speaking, Bihari, Odia, Assamese and Sikkimese.
-- **23 clinical storylines** drawn from common Indian OPD practice: diabetes with hypertension, CKD, coronary artery disease, NAFLD, drug-sensitive TB on HRZE, dengue with falling platelets, typhoid, *P. vivax* malaria, chikungunya, childhood gastroenteritis, recurrent tonsillitis, UTI, hypothyroidism, PCOS, iron-deficiency anaemia, gestational diabetes, vitamin D/B12 deficiency, asthma, COPD from biomass smoke, knee osteoarthritis, GERD with *H. pylori*, and depression.
+- The publishers de-identified the data: no names, addresses or exact dates. Patients appear as `Patient 10040025` with MRN `MIMIC-10040025`.
+- Allergies, blood group and free-text notes are not in the demo. The AI reports them as gaps instead of guessing.
+- Source, licence, citation and exact field mapping: [`backend/app/db/data/README.md`](backend/app/db/data/README.md).
+- Using a real hospital's live records would need ethics approval and patient consent (India's DPDP Act 2023), so a published research dataset is used instead.
 
-Each storyline spans 1 to 3 visits with symptoms that recur, diagnoses that change status (provisional, confirmed, ruled out, resolved) and lab values that trend, so the AI summary has real material to cite. About 6% of patients have no blood group recorded and a few have no emergency contact number, so the data-gap detector has real gaps to find.
+`DATA_SOURCE=synthetic` switches back to the hand-written storylines and the generated Indian cohort (`backend/app/db/seed_data.py`, `cohort*.py`). The pytest suite always runs on that synthetic data in a temporary database (`backend/tests/conftest.py`).
 
 To reseed locally, delete `backend/medical_records.db` and restart the API.
 
@@ -130,7 +131,7 @@ The backend defaults to local SQLite (`medical_records.db`, or `/tmp/medical_rec
    ```env
    DATABASE_URL=postgresql://medadmin:medpassword123@localhost:5432/medical_records_db
    ```
-3. Restart Uvicorn to create tables and seed the 162 synthetic patients.
+3. Restart Uvicorn to create tables and seed the 100 MIMIC-IV patients.
 
 ---
 

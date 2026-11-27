@@ -5,7 +5,7 @@ import type { PatientDetail, Visit } from '../lib/types';
 import { useWorkspace } from '../workspace';
 
 export const BLOOD_GROUPS = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
-const VISIT_TYPES = ['OPD', 'Follow-up', 'Emergency', 'Telehealth'];
+const VISIT_TYPES = ['OPD', 'Follow-up', 'Emergency', 'Inpatient', 'Telehealth'];
 
 const nullIfBlank = (v: string) => (v.trim() ? v.trim() : null);
 

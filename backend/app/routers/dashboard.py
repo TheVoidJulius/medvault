@@ -176,3 +176,35 @@ def get_dashboard_overview(
         "top_conditions": top_conditions,
         "top_symptoms": top_symptoms,
     }
+
+
+@router.get("/public")
+def public_overview(db: Session = Depends(get_db)):
+    """Aggregate counts for the public landing page. Totals only; no patient rows leave without sign-in."""
+    first, last = db.query(func.min(Visit.visit_date), func.max(Visit.visit_date)).one()
+    real = db.query(Patient).filter(Patient.is_synthetic == False).count()  # noqa: E712
+    return {
+        "patients": db.query(Patient).filter(Patient.is_active == True).count(),  # noqa: E712
+        "real_patients": real,
+        "visits": db.query(Visit).count(),
+        "emergency_visits": db.query(Visit).filter(Visit.visit_type == "Emergency").count(),
+        "diagnoses": db.query(Diagnosis).count(),
+        "distinct_conditions": db.query(func.count(func.distinct(Diagnosis.condition_name))).scalar(),
+        "prescriptions": db.query(Prescription).count(),
+        "lab_results": db.query(TestResult).count(),
+        "abnormal_labs": db.query(TestResult).filter(TestResult.flag != "Normal").count(),
+        "symptoms": db.query(Symptom).count(),
+        "notes": db.query(ClinicalNote).count(),
+        "first_year": first.year if first else None,
+        "last_year": last.year if last else None,
+        "source": (
+            {
+                "name": "MIMIC-IV Clinical Database Demo v2.2 and MIMIC-IV-ED Demo v2.2",
+                "institution": "Beth Israel Deaconess Medical Center, Boston",
+                "license": "Open Database License (ODbL)",
+                "url": "https://physionet.org/content/mimic-iv-demo/2.2/",
+            }
+            if real
+            else {"name": "Synthetic demonstration records", "institution": None, "license": None, "url": None}
+        ),
+    }

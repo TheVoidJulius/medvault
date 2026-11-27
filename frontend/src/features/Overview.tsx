@@ -51,7 +51,7 @@ export function Overview() {
     <div className="space-y-6">
       <PageHeader
         title={`Overview for ${firstName}`}
-        lede={`${c.total_patients} patients and ${c.total_visits} visits on record${latest ? `. Latest visit ${formatDate(latest)}.` : '.'}`}
+        lede={`${c.total_patients} patients and ${c.total_visits} visits on record${latest ? `, the latest on ${formatDate(latest)}` : ''}. Pick a visit or a flagged lab to open the chart.`}
       />
 
       <dl className="nums grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule sm:grid-cols-3 lg:grid-cols-6">
@@ -84,7 +84,10 @@ export function Overview() {
                   >
                     <td className="px-5 py-3 align-top">
                       <span className="block font-semibold">{v.patient_name}</span>
-                      <span className="code whitespace-nowrap text-ink-3">{v.patient_mrn}</span>
+                      {/* De-identified patients are named by their record number; do not print it twice. */}
+                      {!v.patient_mrn.endsWith(v.patient_name.split(' ').pop() ?? '') && (
+                        <span className="code whitespace-nowrap text-ink-3">{v.patient_mrn}</span>
+                      )}
                     </td>
                     <td className="max-w-[22rem] px-3 py-3 align-top">
                       <span className="line-clamp-1 text-ink">{v.primary_diagnosis}</span>

@@ -21,30 +21,6 @@ function useWidth<T extends HTMLElement>() {
   return [ref, width] as const;
 }
 
-/** One PQRST complex repeated; used as the sign-in hero trace. */
-export function EcgTrace({ className }: { className?: string }) {
-  const beat = (x: number) =>
-    `L${x + 0} 60 L${x + 18} 60 Q${x + 24} 52 ${x + 30} 60 L${x + 38} 60 L${x + 41} 66 L${x + 46} 14 L${x + 51} 78 L${x + 55} 60 L${x + 68} 60 Q${x + 78} 46 ${x + 88} 60 L${x + 110} 60`;
-  let d = 'M0 60';
-  for (let x = 0; x < 880; x += 110) d += ` ${beat(x)}`;
-  return (
-    <svg viewBox="0 0 880 100" preserveAspectRatio="none" className={className} aria-hidden>
-      <path
-        d={d}
-        fill="none"
-        stroke="rgb(var(--trace))"
-        strokeWidth="2"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        vectorEffect="non-scaling-stroke"
-        style={{ strokeDasharray: 1400, ['--len' as string]: '1400', strokeDashoffset: 1400 }}
-        className="animate-draw"
-        pathLength={1400}
-      />
-    </svg>
-  );
-}
-
 interface Point {
   visit: Visit;
   x: number;

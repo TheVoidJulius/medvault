@@ -9,6 +9,7 @@ import { PatientDirectory } from './features/PatientDirectory';
 import { RegisterPatientModal } from './features/PatientForms';
 import { RecordSearch } from './features/RecordSearch';
 import { Shell } from './features/Shell';
+import { Landing } from './features/Landing';
 import { SignIn } from './features/SignIn';
 import { createApi, errorText } from './lib/http';
 import type { Medication, PatientListItem, User } from './lib/types';
@@ -167,8 +168,23 @@ function MedVault() {
   const openRegister = useCallback(() => setRegisterOpen(true), []);
 
   if (!token || !user) {
+    if (window.location.hash !== '#/sign-in') {
+      return (
+        <Landing
+          onSignIn={() => {
+            window.history.pushState(null, '', '#/sign-in');
+            setRoute({ view: 'overview' });
+            window.scrollTo?.({ top: 0 });
+          }}
+        />
+      );
+    }
     return (
       <SignIn
+        onBack={() => {
+          window.history.pushState(null, '', '#/');
+          setRoute({ view: 'overview' });
+        }}
         onSignedIn={(t, u) => {
           sessionStorage.setItem('medvault_token', t);
           sessionStorage.setItem('medvault_user', JSON.stringify(u));

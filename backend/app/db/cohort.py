@@ -111,6 +111,20 @@ def _as_dt(d: date, rng: Random) -> datetime:
                     tzinfo=timezone.utc)
 
 
+def add_specialist_doctors(db: Session, doctors: Dict[str, Doctor], rng: Random) -> None:
+    """Create the eight specialist demo accounts. They share the internal-medicine doctor's password hash."""
+    doctor_role_id = doctors["internal"].user.role_id
+    # One bcrypt hash shared by every demo doctor keeps cold starts fast on serverless.
+    shared_hash = doctors["internal"].user.password_hash
+    for key, email, full_name, specialization, department, reg_no in EXTRA_DOCTORS:
+        user = User(email=email, password_hash=shared_hash, full_name=full_name, role_id=doctor_role_id, is_active=True)
+        doctor = Doctor(user=user, specialization=specialization, license_no=reg_no, department=department,
+                        phone=_mobile(rng))
+        db.add(doctor)
+        doctors[key] = doctor
+    db.flush()
+
+
 def seed_cohort(db: Session, meds: Dict[str, Medication], doctors: Dict[str, Doctor], next_mrn: int) -> int:
     """Insert the generated cohort. Returns the number of patients created."""
     rng = Random(COHORT_SEED)
@@ -123,16 +137,7 @@ def seed_cohort(db: Session, meds: Dict[str, Medication], doctors: Dict[str, Doc
         db.add(med)
         meds[name] = med
 
-    doctor_role_id = doctors["internal"].user.role_id
-    # One bcrypt hash shared by every demo doctor keeps cold starts fast on serverless.
-    shared_hash = doctors["internal"].user.password_hash
-    for key, email, full_name, specialization, department, reg_no in EXTRA_DOCTORS:
-        user = User(email=email, password_hash=shared_hash, full_name=full_name, role_id=doctor_role_id, is_active=True)
-        doctor = Doctor(user=user, specialization=specialization, license_no=reg_no, department=department,
-                        phone=_mobile(rng))
-        db.add(doctor)
-        doctors[key] = doctor
-    db.flush()
+    add_specialist_doctors(db, doctors, rng)
 
     created = 0
     used_names = set()

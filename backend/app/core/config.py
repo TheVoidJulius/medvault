@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 720
 
+    # "mimic": real de-identified patients from the MIMIC-IV demo (default).
+    # "synthetic": hand-written storylines plus the generated Indian cohort (used by the test suite).
+    DATA_SOURCE: str = "mimic"
     AI_PROVIDER: str = "grounded_hybrid"
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.0-flash"

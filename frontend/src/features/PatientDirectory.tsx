@@ -52,7 +52,7 @@ export function PatientDirectory() {
     <div className="space-y-5">
       <PageHeader
         title="Patients"
-        lede={`${patients.length} registered. Search by name, MRN, mobile, condition or allergy.`}
+        lede={`${patients.length} patients. Search by name, MRN, condition or allergy.`}
         actions={
           <Button tone="pen" onClick={openRegister} icon={<UserPlus className="h-4 w-4" />}>
             Register patient
@@ -67,7 +67,7 @@ export function PatientDirectory() {
             aria-label="Search patients"
             value={q}
             onChange={(e) => resetTo(() => setQ(e.target.value))}
-            placeholder="Try “dengue”, “Reddy” or “MRN-2026-00042”"
+            placeholder="Try “sepsis”, “heart failure” or “10002428”"
             className="pl-9"
           />
         </div>
@@ -127,7 +127,7 @@ export function PatientDirectory() {
             <thead className="border-b border-rule text-ink-3">
               <tr>
                 <th className="px-5 py-2.5 font-medium">Patient</th>
-                <th className="hidden px-3 py-2.5 font-medium sm:table-cell">Age, sex</th>
+                <th className="hidden px-3 py-2.5 font-medium sm:table-cell" title="Age at the most recent visit">Age, sex</th>
                 <th className="hidden px-3 py-2.5 font-medium lg:table-cell">Blood</th>
                 <th className="px-3 py-2.5 font-medium">Conditions</th>
                 <th className="hidden px-3 py-2.5 font-medium md:table-cell">Allergies</th>
@@ -149,7 +149,7 @@ export function PatientDirectory() {
                     <span className="code block whitespace-nowrap text-ink-3">{p.mrn}</span>
                   </td>
                   <td className="hidden whitespace-nowrap px-3 py-3 align-top text-ink-2 sm:table-cell">
-                    {ageFrom(p.date_of_birth)}, {p.sex}
+                    {ageFrom(p.date_of_birth, p.last_visit_date ? new Date(p.last_visit_date) : undefined)}, {p.sex}
                   </td>
                   <td className="hidden px-3 py-3 align-top lg:table-cell">
                     {p.blood_group ? <span className="code">{p.blood_group}</span> : <span className="text-ink-3">Not recorded</span>}

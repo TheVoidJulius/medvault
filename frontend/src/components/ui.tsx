@@ -355,7 +355,7 @@ export function PageHeader({ title, lede, actions }: { title: string; lede?: str
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
-        <h1 className="text-[1.75rem] font-extrabold leading-tight tracking-[-0.03em]">{title}</h1>
+        <h1 className="display text-[2.5rem] leading-[0.95]">{title}</h1>
         {lede && <p className="mt-1 text-ink-2">{lede}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}

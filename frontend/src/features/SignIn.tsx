@@ -2,7 +2,6 @@ import { FormEvent, useState } from 'react';
 import { ArrowRight, Lock } from 'lucide-react';
 import { Button, Input, Notice } from '../components/ui';
 import { Logo } from '../components/Logo';
-import { EcgTrace } from '../components/vitals';
 import { cx } from '../lib/format';
 import type { User } from '../lib/types';
 
@@ -13,7 +12,7 @@ const DEMO_ACCOUNTS = [
   { name: 'Pushkar Panwar', role: 'Records administrator', email: 'admin@medvault.edu', password: 'Admin@123' },
 ];
 
-export function SignIn({ onSignedIn }: { onSignedIn: (token: string, user: User) => void }) {
+export function SignIn({ onSignedIn, onBack }: { onSignedIn: (token: string, user: User) => void; onBack?: () => void }) {
   const [email, setEmail] = useState(DEMO_ACCOUNTS[0].email);
   const [password, setPassword] = useState(DEMO_ACCOUNTS[0].password);
   const [error, setError] = useState<string | null>(null);
@@ -42,26 +41,28 @@ export function SignIn({ onSignedIn }: { onSignedIn: (token: string, user: User)
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.15fr_1fr]">
       <section className="ecg-paper relative flex flex-col justify-between overflow-hidden border-b border-rule px-6 py-8 sm:px-12 lg:border-b-0 lg:border-r lg:py-12">
-        <Logo size="lg" />
+        <button type="button" onClick={onBack} className="self-start" aria-label="Back to the MedVault home page">
+          <Logo size="lg" />
+        </button>
 
         <div className="my-10 lg:my-0">
-          <h1 className="max-w-xl text-[2.5rem] font-extrabold leading-[1.02] tracking-[-0.045em] sm:text-[3.5rem]">
+          <h1 className="display max-w-xl text-[3rem] uppercase leading-[0.88] sm:text-[4.5rem]">
             Every patient’s history, read back to you with its sources.
           </h1>
-          <EcgTrace className="mt-8 h-20 w-full sm:h-24" />
+          <img src="/art/heart-posterior.png" alt="" className="mt-6 hidden w-full max-w-[15rem] mix-blend-multiply dark:opacity-80 dark:mix-blend-screen sm:block" />
           <p className="mt-6 max-w-lg text-[0.9375rem] leading-relaxed text-ink-2">
-            Visits, diagnoses, prescriptions and labs live in one relational record. Summaries and answers cite the exact rows they came from, and say so when the record is silent.
+            Real, de-identified hospital admissions from the MIMIC-IV database: diagnoses, prescriptions, labs and emergency triage. Summaries and answers cite the exact rows they came from, and say so when the record is silent.
           </p>
         </div>
 
-        <dl className="grid max-w-lg grid-cols-3 gap-4 text-[0.8125rem]">
+        <dl className="mt-8 grid max-w-lg grid-cols-3 gap-4 text-[0.8125rem]">
           <div>
-            <dt className="text-ink-3">Patients</dt>
-            <dd className="text-xl font-bold">160+</dd>
+            <dt className="text-ink-3">Real patients</dt>
+            <dd className="text-xl font-bold">100</dd>
           </div>
           <div>
-            <dt className="text-ink-3">Linked tables</dt>
-            <dd className="text-xl font-bold">13</dd>
+            <dt className="text-ink-3">Visits</dt>
+            <dd className="text-xl font-bold">325</dd>
           </div>
           <div>
             <dt className="text-ink-3">Claims cited</dt>
@@ -73,7 +74,7 @@ export function SignIn({ onSignedIn }: { onSignedIn: (token: string, user: User)
       <section className="flex items-center justify-center bg-sheet px-6 py-10 sm:px-12">
         <div className="w-full max-w-sm">
           <h2 className="text-2xl font-extrabold tracking-[-0.03em]">Sign in</h2>
-          <p className="mt-1 text-[0.8125rem] text-ink-2">All records here are synthetic. Pick a demo account or use your own credentials.</p>
+          <p className="mt-1 text-[0.8125rem] text-ink-2">Patients are real but de-identified (MIMIC-IV demo). Pick a demo doctor account to explore.</p>
 
           <fieldset className="mt-6">
             <legend className="mb-2 text-[0.8125rem] font-semibold">Demo accounts</legend>

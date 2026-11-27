@@ -39,9 +39,9 @@ function Rail({
   return (
     <div className="flex h-full flex-col bg-rail text-rail-ink">
       <div className="flex h-16 items-center justify-between px-5">
-        <Logo onDark />
+        <Logo />
         {onClose && (
-          <button type="button" onClick={onClose} aria-label="Close navigation" className="rounded-ctl p-1.5 hover:bg-white/10">
+          <button type="button" onClick={onClose} aria-label="Close navigation" className="rounded-ctl p-1.5 hover:bg-rail-ink/10">
             <X className="h-4 w-4" />
           </button>
         )}
@@ -58,10 +58,10 @@ function Rail({
               onClick={() => go({ view } as Route)}
               className={cx(
                 'flex w-full items-center gap-3 rounded-ctl px-3 py-2 text-sm font-semibold transition-colors',
-                active ? 'bg-white/[0.09] text-white' : 'text-rail-ink/75 hover:bg-white/5 hover:text-white',
+                active ? 'bg-sheet text-rail-ink shadow-[0_1px_0_rgb(var(--rule))]' : 'text-rail-ink/70 hover:bg-rail-ink/5 hover:text-rail-ink',
               )}
             >
-              <Icon className={cx('h-4 w-4', active && 'text-[#9DB0FF]')} aria-hidden />
+              <Icon className={cx('h-4 w-4', active && 'text-pen')} aria-hidden />
               {label}
             </button>
           );
@@ -81,7 +81,7 @@ function Rail({
                     onClick={() => go({ view: 'chart', patientId: p.id, tab: 'timeline' })}
                     className={cx(
                       'flex w-full items-center justify-between gap-2 rounded-ctl px-3 py-1.5 text-left text-[0.8125rem]',
-                      active ? 'bg-white/[0.09] text-white' : 'text-rail-ink/75 hover:bg-white/5 hover:text-white',
+                      active ? 'bg-sheet text-rail-ink shadow-[0_1px_0_rgb(var(--rule))]' : 'text-rail-ink/70 hover:bg-rail-ink/5 hover:text-rail-ink',
                     )}
                   >
                     <span className="truncate">{fullName(p)}</span>
@@ -97,10 +97,10 @@ function Rail({
       <div className="mt-auto border-t border-rail-line px-5 py-4">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-[0.8125rem] font-semibold text-white">{user.full_name}</p>
+            <p className="truncate text-[0.8125rem] font-semibold text-rail-ink">{user.full_name}</p>
             <p className="text-2xs capitalize text-rail-ink/55">{user.doctor_profile?.specialization ?? user.role_name}</p>
           </div>
-          <button type="button" onClick={onSignOut} aria-label="Sign out" title="Sign out" className="rounded-ctl p-2 text-rail-ink/70 hover:bg-white/10 hover:text-white">
+          <button type="button" onClick={onSignOut} aria-label="Sign out" title="Sign out" className="rounded-ctl p-2 text-rail-ink/70 hover:bg-rail-ink/10 hover:text-rail-ink">
             <LogOut className="h-4 w-4" />
           </button>
         </div>

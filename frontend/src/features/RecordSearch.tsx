@@ -8,12 +8,12 @@ import type { AIQueryResponse, PatientDetail } from '../lib/types';
 import { useWorkspace } from '../workspace';
 
 const COHORT_QUESTIONS = [
-  'Which patients had dengue with falling platelets?',
-  'Find tuberculosis cases on HRZE',
-  'Show diabetes records with high HbA1c from 2026',
-  'Find previous records mentioning recurring headaches',
-  'Which patients were prescribed Methotrexate?',
-  'Find allergy reactions to Penicillin',
+  'Which patients had heart failure?',
+  'Find sepsis admissions',
+  'Show high creatinine results',
+  'Which patients were given vancomycin?',
+  'Find previous records mentioning chest pain',
+  'Find records mentioning Ebola',
 ];
 
 const PATIENT_QUESTIONS = [

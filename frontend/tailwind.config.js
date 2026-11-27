@@ -30,8 +30,8 @@ export default {
         grid: token('grid'),
       },
       fontFamily: {
-        sans: ['"Schibsted Grotesk"', 'system-ui', 'sans-serif'],
-        mono: ['"Fragment Mono"', 'ui-monospace', 'monospace'],
+        sans: ['Archivo', 'system-ui', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],

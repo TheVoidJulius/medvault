@@ -119,7 +119,7 @@ class Patient(Base):
 class Visit(Base):
     __tablename__ = "visits"
     __table_args__ = (
-        CheckConstraint("visit_type IN ('OPD', 'Follow-up', 'Emergency', 'Telehealth')", name="ck_visit_type"),
+        CheckConstraint("visit_type IN ('OPD', 'Follow-up', 'Emergency', 'Telehealth', 'Inpatient')", name="ck_visit_type"),
         CheckConstraint("vitals_hr IS NULL OR (vitals_hr >= 20 AND vitals_hr <= 300)", name="ck_visit_hr"),
         CheckConstraint("vitals_spo2 IS NULL OR (vitals_spo2 >= 50 AND vitals_spo2 <= 100)", name="ck_visit_spo2"),
         Index("ix_visit_patient_date", "patient_id", "visit_date"),
