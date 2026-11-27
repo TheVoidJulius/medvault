@@ -11,7 +11,7 @@ The report is regenerated from the project itself each time it runs:
   - code excerpts are copied verbatim from the source files by start/end markers;
   - screenshots are embedded from docs/screenshots/*.jpg in filename order.
 
-Page 1 is left blank for the college cover page. When `soffice` and `pdftotext` are available
+Page 1 is the K.R. Mangalam University cover page. When `soffice` and `pdftotext` are available
 the script builds twice: once to find the page of every heading in the PDF, then again to write
 those page numbers into the table of contents.
 
@@ -649,12 +649,53 @@ def fmt_int(n):
     return f"{n:,}"
 
 
+COVER_LOGO = DOCS / "assets" / "krmu-logo.png"
+COVER_FONT = "Calibri"
+
+
+def build_cover(doc):
+    """Page 1: the K.R. Mangalam University cover, matching the department's report template."""
+    def line(text="", size=12, bold=False, italic=False, underline=False, after=4, before=0):
+        para = doc.add_paragraph()
+        para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        pf = para.paragraph_format
+        pf.space_before, pf.space_after, pf.line_spacing = Pt(before), Pt(after), 1.15
+        if text:
+            r = para.add_run(text)
+            r.font.name, r.font.size = COVER_FONT, Pt(size)
+            r.bold, r.italic, r.underline = bold, italic, underline
+            r._element.rPr.rFonts.set(qn("w:eastAsia"), COVER_FONT)
+        return para
+
+    line("Database Management System Project Report", 20, bold=True, underline=True, before=36, after=10)
+    line("MedVault AI: Medical Records Management System", 16, bold=True, underline=True, after=26)
+    line("Design and Implementation of a Relational Database for Managing Patient Records, Visits, "
+         "Prescriptions and Laboratory Results with Citation-Grounded AI Summaries", 13, after=22)
+    line("Submitted in partial fulfilment of the requirement of the degree of", 11, italic=True, after=6)
+    line("BACHELOR OF TECHNOLOGY (CSE / AI&ML)", 12, bold=True, after=6)
+    line("Subject: Database Management System", 11, bold=True, after=6)
+    line("Semester \u2014 III", 11, bold=True, after=22)
+    line("to", 11, italic=True, after=6)
+    line("K.R. Mangalam University", 14, bold=True, after=22)
+    line("by", 11, italic=True, after=6)
+    line("Pushkar Panwar (2501730022)", 11, bold=True, after=6)
+    line("Saksham Singh (2501730270)", 11, bold=True, after=22)
+    line("Under the supervision of", 11, italic=True, after=6)
+    line("Mrs. Mansi Kajal - DBMS Teacher", 11, bold=True, after=14)
+    if COVER_LOGO.exists():
+        logo = line(after=18)
+        logo.add_run().add_picture(str(COVER_LOGO), width=Inches(1.6))
+    line("Department of Computer Science and Engineering", 12, after=6)
+    line("School of Engineering and Technology", 12, after=6)
+    line("K.R. Mangalam University, Gurugram \u2014 122001, India", 12, after=0)
+
+
 def build(stats, tests, pages):
     R = Report()
     doc = R.doc
 
-    # ---------- page 1: blank cover (filled in by the student)
-    doc.add_paragraph()
+    # ---------- page 1: university cover page (layout follows the department's report template)
+    build_cover(doc)
     for sec in doc.sections:
         sec.page_width, sec.page_height = Inches(8.27), Inches(11.69)
         sec.left_margin = sec.right_margin = sec.top_margin = sec.bottom_margin = Inches(1)
@@ -677,28 +718,8 @@ def build(stats, tests, pages):
     span = f"{s['span'][0].year} to {s['span'][1].year}" if s["span"] else "n/a"
     grounding_pct = 100.0 * s["cits_verified"] / max(s["cits_total"], 1)
 
-    # ---------- Abstract
-    R.h1("Abstract", new_page=False)
-    R.p(
-        "Doctors often lose time searching through scattered visit notes, prescriptions and laboratory reports to "
-        "understand a patient's history. MedVault AI is a web-based medical records database that stores each "
-        "patient's history in a normalised relational schema and adds three AI-assisted features on top of it: a "
-        "patient summary in which every statement carries a citation tag (for example [DX-12]) that points to the exact "
-        "database row it came from, a plain-English record search that returns ranked source rows or states that "
-        "nothing matches, and extraction of symptoms, diagnoses and drugs from a consultation note. The system uses "
-        "React, TypeScript and three.js in the browser and Python FastAPI with SQLAlchemy on the server, and is "
-        f"deployed on Vercel. It is seeded with {real_note} from the MIMIC-IV Clinical Database Demo (Beth Israel "
-        f"Deaconess Medical Center, Boston). Across all {s['summaries']} patient summaries, {fmt_int(s['cits_verified'])} of "
-        f"{fmt_int(s['cits_total'])} citations ({grounding_pct:.0f}%) matched a stored row."
-    )
-    R.p(f"**Project team:** Pushkar Panwar (2501730022) and Saksham Singh (2501730270).", align=WD_ALIGN_PARAGRAPH.LEFT)
-    R.p(f"**Live demonstration:** {LIVE_URL}", align=WD_ALIGN_PARAGRAPH.LEFT)
-    R.p("**Keywords:** electronic medical records, relational database, normalisation, retrieval, citation grounding, FastAPI, React.",
-        align=WD_ALIGN_PARAGRAPH.LEFT)
-
     # ---------- TOC
     toc_h = doc.add_paragraph()
-    toc_h.paragraph_format.page_break_before = True
     toc_h.paragraph_format.space_after = Pt(12)
     toc_h.alignment = WD_ALIGN_PARAGRAPH.LEFT
     tr = toc_h.add_run("Table of Contents")
@@ -1246,12 +1267,11 @@ def heading_pages(pdf, headings):
     after_toc = (toc_pages[0] + 1) if toc_pages else 1
     for lvl, h in headings:
         key = re.sub(r"\s+", " ", h).strip()
-        begin = 1 if key == "Abstract" else max(start, after_toc)
+        begin = max(start, after_toc)
         for i in range(begin, len(pages)):
             if any(ln == key for ln in pages[i]) or any(ln.startswith(key) and "...." not in ln for ln in pages[i] if len(key) > 30):
                 found[h] = str(i)  # physical index i (0-based) == printed number, since page 1 is unnumbered
-                if key != "Abstract":
-                    start = i
+                start = i
                 break
     return found
 
