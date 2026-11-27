@@ -49,7 +49,7 @@ function Rows<K extends ListKey>({
 }) {
   const rows = form[k] as Form[K][number][];
   return (
-    <fieldset className="rounded-panel border border-rule bg-sheet">
+    <fieldset className="border border-ink bg-sheet">
       <legend className="sr-only">{title}</legend>
       <div className="flex items-center justify-between border-b border-rule px-4 py-2.5">
         <h3 className="text-[0.875rem] font-bold">{title}</h3>
@@ -167,7 +167,7 @@ export function NewVisit({ patient, onSaved }: { patient: PatientDetail; onSaved
 
   return (
     <form onSubmit={submit} className="space-y-4">
-      <section className="rounded-panel border border-rule bg-sheet p-4">
+      <section className="border border-ink bg-sheet p-4">
         <div className="grid gap-3 sm:grid-cols-[180px_1fr]">
           <Select label="Visit type" value={form.visit_type} onChange={set('visit_type')}>
             {VISIT_TYPES.map((t) => (
@@ -185,7 +185,7 @@ export function NewVisit({ patient, onSaved }: { patient: PatientDetail; onSaved
         </div>
       </section>
 
-      <section className="rounded-panel border border-rule bg-sheet p-4">
+      <section className="border border-ink bg-sheet p-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h3 className="text-[0.875rem] font-bold">Consultation note</h3>
@@ -343,7 +343,7 @@ export function NewVisit({ patient, onSaved }: { patient: PatientDetail; onSaved
         )}
       />
 
-      <section className="rounded-panel border border-rule bg-sheet p-4">
+      <section className="border border-ink bg-sheet p-4">
         <Textarea label="Plan" value={form.treatment_plan} onChange={set('treatment_plan')} placeholder="Treatment, advice and follow-up" />
       </section>
 

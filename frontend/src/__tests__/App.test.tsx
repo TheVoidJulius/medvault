@@ -439,10 +439,12 @@ function createMockFetch() {
       });
 
     if (url.pathname === '/api/auth/login' && method === 'POST') {
+      const body = JSON.parse(String(init?.body || '{}'));
+      const user = body.email === 'admin@medvault.edu' ? { ...MOCK_USER, id: 9, email: body.email, full_name: 'Pushkar Panwar', role_name: 'admin', doctor_profile: null } : MOCK_USER;
       return jsonResponse({
         access_token: 'mock-jwt-token-2026',
         token_type: 'bearer',
-        user: MOCK_USER,
+        user,
       });
     }
 
@@ -608,7 +610,9 @@ function createMockFetch() {
     }
 
     if (url.pathname === '/api/auth/audit-logs') {
-      return jsonResponse([]);
+      return jsonResponse([
+        { id: 1, created_at: '2026-11-27T08:00:00', user_name: 'Dr. Ananya Sharma, MD', user_role: 'doctor', action: 'AI_GENERATE_SUMMARY', detail: 'Summary for MV-2026-0001' },
+      ]);
     }
 
     return jsonResponse({ detail: `Unhandled mock route: ${method} ${url.pathname}` }, 404);
@@ -655,6 +659,18 @@ describe('MedVault AI frontend', () => {
     expect(window.location.hash).toBe('#/sign-in');
   });
 
+  it('gives the admin a records-administration home with completeness and activity', async () => {
+    window.location.hash = '#/sign-in';
+    render(<App />);
+    fireEvent.click(screen.getByRole('button', { name: /Pushkar Panwar/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }));
+    await waitFor(() => expect(screen.getByRole('heading', { name: /Records administration/ })).toBeInTheDocument());
+    const main = screen.getByRole('main');
+    expect(within(main).getByText('Data completeness')).toBeInTheDocument();
+    await waitFor(() => expect(within(main).getByText('Blood group recorded')).toBeInTheDocument());
+    await waitFor(() => expect(within(main).getByText('Generated AI summary')).toBeInTheDocument());
+  });
+
   it('keeps the session token in sessionStorage only', async () => {
     await signInAsDoctor();
     expect(sessionStorage.getItem('medvault_token')).toBe('mock-jwt-token-2026');
@@ -666,7 +682,7 @@ describe('MedVault AI frontend', () => {
     const main = screen.getByRole('main');
     expect(within(main).getByText('Diagnoses').nextSibling).toHaveTextContent('18');
     expect(within(main).getByText('6 dx')).toBeInTheDocument();
-    expect(within(main).getByText('5 reports')).toBeInTheDocument();
+    expect(within(main).getByText('Visits per month')).toBeInTheDocument();
     expect(within(main).getByText('Recurring throbbing unilateral headaches')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Switch to dark theme' }));

@@ -11,28 +11,28 @@
 */
 :root {
   color-scheme: light;
-  /* Cool lab grey with ultramarine ink, after anatomical plates printed in one colour.
+  /* Same canvas as the landing page: lab grey, black rules, one ultramarine ink.
      Trace red stays reserved for clinical danger. */
-  --paper: 222 224 228;
-  --sheet: 244 245 246;
-  --well: 231 233 236;
-  --rule: 200 204 210;
-  --rule-strong: 166 171 179;
+  --paper: 180 183 189;
+  --sheet: 196 199 204;
+  --well: 170 173 179;
+  --rule: 126 130 137;
+  --rule-strong: 17 19 23;
   --ink: 17 19 23;
-  --ink-2: 62 67 75;
-  --ink-3: 94 100 109;
+  --ink-2: 40 44 50;
+  --ink-3: 58 63 70;
   --pen: 31 53 198;
   --pen-strong: 22 38 150;
-  --pen-wash: 225 229 249;
-  --trace: 190 30 48;
-  --trace-wash: 249 230 232;
-  --ok: 23 108 72;
-  --ok-wash: 223 239 231;
-  --warn: 146 84 0;
-  --warn-wash: 248 237 218;
-  --rail: 210 213 218;
+  --pen-wash: 214 219 243;
+  --trace: 170 20 38;
+  --trace-wash: 226 205 208;
+  --ok: 18 96 62;
+  --ok-wash: 200 222 210;
+  --warn: 122 70 0;
+  --warn-wash: 228 214 190;
+  --rail: 180 183 189;
   --rail-ink: 17 19 23;
-  --rail-line: 186 190 197;
+  --rail-line: 17 19 23;
   --grid: 31 53 198;
 
   --series-1: #2E44D0;

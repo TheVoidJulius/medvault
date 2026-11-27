@@ -64,8 +64,8 @@ export function PatientChart({ patientId, tab, focusVisit }: { patientId: number
       {/* Identity */}
       <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="code text-ink-3">{patient.mrn}</p>
-          <h1 className="display mt-1 text-[2.75rem] leading-[0.95]">{fullName(patient)}</h1>
+          <p className="font-mono text-[0.75rem] text-ink-2">{patient.mrn}</p>
+          <h1 className="display mt-1 text-[3rem] uppercase leading-[0.9] sm:text-[3.5rem]">{fullName(patient)}</h1>
           <p className="mt-1.5 text-[1rem] text-ink-2">
             {lastVisit
               ? `${ageFrom(patient.date_of_birth, new Date(lastVisit.visit_date))} years at last visit (${formatDate(lastVisit.visit_date, { day: undefined })})`
@@ -85,7 +85,7 @@ export function PatientChart({ patientId, tab, focusVisit }: { patientId: number
       </header>
 
       {/* Alerts strip: allergies always visible */}
-      <section aria-label="Allergies" className="flex flex-wrap items-center gap-2 rounded-panel border border-rule bg-sheet px-4 py-3">
+      <section aria-label="Allergies" className="flex flex-wrap items-center gap-2 border border-ink bg-sheet px-4 py-2.5">
         <ShieldAlert className={activeAllergies.length ? 'h-4 w-4 text-trace' : 'h-4 w-4 text-ink-3'} aria-hidden />
         {activeAllergies.length === 0 ? (
           <span className="text-[0.9375rem] text-ink-2">No known allergies recorded.</span>

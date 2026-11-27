@@ -64,7 +64,7 @@ function Statements({
 
 function Block({ title, children, className }: { title: string; children: ReactNode; className?: string }) {
   return (
-    <section className={cx('rounded-panel border border-rule bg-sheet p-4', className)}>
+    <section className={cx('border border-ink bg-sheet p-4', className)}>
       <h3 className="mb-2 text-[0.875rem] font-bold">{title}</h3>
       {children}
     </section>
@@ -119,7 +119,7 @@ export function Summary({ patient, stale }: { patient: PatientDetail; stale: num
   return (
     <div className="space-y-4">
       {/* Grounding receipt */}
-      <section className="rounded-panel border border-rule bg-sheet p-4">
+      <section className="border border-ink bg-sheet p-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-3">
             <ShieldCheck className={cx('mt-0.5 h-5 w-5 shrink-0', pct === 100 ? 'text-ok' : 'text-warn')} aria-hidden />
@@ -186,7 +186,7 @@ export function Summary({ patient, stale }: { patient: PatientDetail; stale: num
         </Block>
       </div>
 
-      <section className="overflow-hidden rounded-panel border border-rule bg-sheet">
+      <section className="overflow-hidden border border-ink bg-sheet">
         <h3 className="border-b border-rule px-4 py-2.5 text-[0.875rem] font-bold">Visit by visit</h3>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-[0.8125rem]">

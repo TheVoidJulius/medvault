@@ -18,7 +18,7 @@ const ACTION_LABEL: Record<string, string> = {
   AI_EXTRACT_CLINICAL_NOTE: 'Extracted note',
 };
 
-const humanise = (action: string) => ACTION_LABEL[action] ?? action.toLowerCase().replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
+export const humanise = (action: string) => ACTION_LABEL[action] ?? action.toLowerCase().replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase());
 
 export function AuditLog() {
   const { api, revision } = useWorkspace();
@@ -39,7 +39,7 @@ export function AuditLog() {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Audit trail" lede="Every sign-in, record change, AI summary and question, with who did it and when." />
+      <PageHeader title="Audit trail" />
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-3" aria-hidden />
         <Input aria-label="Filter audit entries" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter by person, action or patient" className="pl-9" />
@@ -48,7 +48,7 @@ export function AuditLog() {
       {!logs && !error && <Skeleton className="h-96" />}
       {logs && rows.length === 0 && <Empty title="No entries match" body="Try a different name or action." />}
       {rows.length > 0 && (
-        <div className="overflow-x-auto rounded-panel border border-rule bg-sheet">
+        <div className="overflow-x-auto border border-ink bg-sheet">
           <table className="w-full text-left text-[0.8125rem]">
             <thead className="border-b border-rule text-ink-3">
               <tr>

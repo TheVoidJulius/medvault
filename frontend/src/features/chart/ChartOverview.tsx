@@ -7,9 +7,9 @@ import { byNewest, conditionGroups, labGroups, latestVitals } from './records';
 
 function Card({ title, action, children, className }: { title: string; action?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return (
-    <section className={cx('rounded-panel border border-rule bg-sheet', className)}>
-      <header className="flex items-center justify-between gap-2 border-b border-rule px-5 py-3">
-        <h2 className="text-[1rem] font-bold">{title}</h2>
+    <section className={cx('border border-ink bg-sheet', className)}>
+      <header className="flex items-center justify-between gap-2 border-b border-ink px-5 py-2.5">
+        <h2 className="font-mono text-[0.8125rem] font-medium">{title}</h2>
         {action}
       </header>
       <div className="px-5 py-4">{children}</div>
@@ -40,20 +40,20 @@ export function ChartOverview({
   return (
     <div className="space-y-6">
       {/* Vitals at a glance */}
-      <section aria-label="Latest vitals" className="grid grid-cols-2 gap-px overflow-hidden rounded-panel border border-rule bg-rule lg:grid-cols-4">
+      <section aria-label="Latest vitals" className="grid grid-cols-2 gap-px border border-ink bg-ink lg:grid-cols-4">
         {vitals.map((v) => (
-          <div key={v.label} className="bg-sheet px-5 py-4">
+          <div key={v.label} className="bg-paper px-4 py-3" title={v.hint}>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[0.875rem] text-ink-2">{v.label}</span>
+              <span className="font-mono text-[0.75rem] text-ink-2">{v.label}</span>
               {v.state !== 'unknown' && (
                 <Tag tone={v.state === 'normal' ? 'ok' : 'danger'}>{v.state === 'normal' ? 'Normal' : 'Out of range'}</Tag>
               )}
             </div>
-            <p className={cx('mt-1 text-[2rem] font-bold leading-none tracking-[-0.02em]', v.state === 'abnormal' && 'text-trace')}>
+            <p className={cx('display mt-1 text-[2.5rem] leading-none', v.state === 'abnormal' && 'text-trace')}>
               {v.value}
               {v.value !== '—' && <span className="ml-1 text-[0.95rem] font-medium text-ink-3">{v.unit}</span>}
             </p>
-            <p className="mt-1.5 text-[0.8125rem] text-ink-3">{v.date ? `Recorded ${formatDate(v.date)}` : 'Not recorded'}. {v.hint}.</p>
+            <p className="mt-1 font-mono text-[0.75rem] text-ink-2">{v.date ? formatDate(v.date) : 'Not recorded'}</p>
           </div>
         ))}
       </section>
@@ -177,10 +177,10 @@ export function ChartOverview({
       {patient.visits.length > 0 && (
         <section aria-label="Vitals across visits">
           <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-[1rem] font-bold">
+            <h2 className="font-mono text-[0.8125rem] font-medium">
               Vitals over {patient.visits.length} visits{emergencies ? `, ${emergencies} in emergency` : ''}
             </h2>
-            <span className="text-[0.8125rem] text-ink-3">Green band is normal. Red marks are out of range. Click a point to open that visit.</span>
+            <span className="font-mono text-[0.75rem] text-ink-2">Red = out of range</span>
           </div>
           <VitalsStrip visits={patient.visits} onSelectVisit={onOpenVisit} />
         </section>

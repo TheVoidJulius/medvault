@@ -37,9 +37,9 @@ export default {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],
       },
       borderRadius: {
-        tag: '4px',
-        ctl: '8px',
-        panel: '14px',
+        tag: '2px',
+        ctl: '2px',
+        panel: '2px',
       },
       boxShadow: {
         float: '0 24px 60px -20px rgb(20 26 31 / 0.35), 0 2px 6px rgb(20 26 31 / 0.08)',

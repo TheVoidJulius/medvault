@@ -1,5 +1,5 @@
 import { ReactNode, useState } from 'react';
-import { LayoutDashboard, LogOut, Menu, MessageSquareText, Moon, ScrollText, Search, Sun, UserPlus, Users, X } from 'lucide-react';
+import { LogOut, Menu, Moon, Search, Sun, UserPlus, X } from 'lucide-react';
 import { Logo } from '../components/Logo';
 import { Button } from '../components/ui';
 import { cx, fullName } from '../lib/format';
@@ -7,10 +7,10 @@ import type { PatientListItem, User } from '../lib/types';
 import type { Route } from '../workspace';
 
 const NAV = [
-  { view: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { view: 'patients', label: 'Patients', icon: Users },
-  { view: 'search', label: 'Ask the records', icon: MessageSquareText },
-  { view: 'audit', label: 'Audit trail', icon: ScrollText },
+  { view: 'overview', label: 'Overview' },
+  { view: 'patients', label: 'Patients' },
+  { view: 'search', label: 'Ask the records' },
+  { view: 'audit', label: 'Audit trail' },
 ] as const;
 
 function isActive(route: Route, view: string) {
@@ -38,7 +38,7 @@ function Rail({
   };
   return (
     <div className="flex h-full flex-col bg-rail text-rail-ink">
-      <div className="flex h-16 items-center justify-between px-5">
+      <div className="flex h-16 items-center justify-between border-b border-ink px-5">
         <Logo />
         {onClose && (
           <button type="button" onClick={onClose} aria-label="Close navigation" className="rounded-ctl p-1.5 hover:bg-rail-ink/10">
@@ -47,8 +47,8 @@ function Rail({
         )}
       </div>
 
-      <nav aria-label="Workspace" className="space-y-0.5 px-3">
-        {NAV.map(({ view, label, icon: Icon }) => {
+      <nav aria-label="Workspace" className="space-y-0.5 px-3 pt-4">
+        {NAV.map(({ view, label }, i) => {
           const active = isActive(route, view);
           return (
             <button
@@ -57,11 +57,13 @@ function Rail({
               aria-current={active ? 'page' : undefined}
               onClick={() => go({ view } as Route)}
               className={cx(
-                'flex w-full items-center gap-3 rounded-ctl px-3 py-2 text-sm font-semibold transition-colors',
-                active ? 'bg-sheet text-rail-ink shadow-[0_1px_0_rgb(var(--rule))]' : 'text-rail-ink/70 hover:bg-rail-ink/5 hover:text-rail-ink',
+                'flex w-full items-center gap-3 border-l-2 px-3 py-2 text-left text-[0.9375rem] font-semibold transition-colors',
+                active ? 'border-pen bg-sheet/60 text-rail-ink' : 'border-transparent text-rail-ink/75 hover:text-rail-ink',
               )}
             >
-              <Icon className={cx('h-4 w-4', active && 'text-pen')} aria-hidden />
+              <span aria-hidden className={cx('font-mono text-[0.75rem] font-normal', active ? 'text-pen' : 'opacity-60')}>
+                ({i + 1})
+              </span>
               {label}
             </button>
           );
@@ -70,7 +72,7 @@ function Rail({
 
       {recent.length > 0 && (
         <div className="mt-8 px-3">
-          <h2 className="px-3 pb-2 text-2xs font-semibold text-rail-ink/50">Recently opened</h2>
+          <h2 className="px-3 pb-2 font-mono text-[0.75rem] text-rail-ink/70">Recently opened</h2>
           <ul className="space-y-0.5">
             {recent.map((p) => {
               const active = route.view === 'chart' && route.patientId === p.id;
@@ -137,7 +139,7 @@ export function Shell({
 
   return (
     <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 lg:block">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 border-r border-ink lg:block">
         <Rail route={route} navigate={navigate} user={user} recent={recent} onSignOut={onSignOut} />
       </aside>
       {drawer && (
@@ -149,7 +151,7 @@ export function Shell({
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-rule bg-paper/90 px-4 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-ink bg-paper/90 px-4 backdrop-blur sm:px-6">
           <button type="button" onClick={() => setDrawer(true)} aria-label="Open navigation" className="rounded-ctl border border-rule p-2 lg:hidden">
             <Menu className="h-4 w-4" />
           </button>

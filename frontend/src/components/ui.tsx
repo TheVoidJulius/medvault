@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const BUTTON_TONES: Record<ButtonTone, string> = {
   pen: 'bg-pen text-white hover:bg-pen-strong dark:text-paper',
   ink: 'bg-ink text-sheet hover:bg-ink/85',
-  line: 'border border-rule-strong bg-sheet text-ink hover:border-ink-3 hover:bg-well',
+  line: 'border border-ink bg-transparent text-ink hover:bg-ink hover:text-paper',
   quiet: 'text-ink-2 hover:bg-well hover:text-ink',
   danger: 'bg-trace text-white hover:bg-trace/90',
 };
@@ -99,10 +99,10 @@ export function Panel({
   as?: 'section' | 'div' | 'article';
 }) {
   return (
-    <Tag className={cx('rounded-panel border border-rule bg-sheet', className)}>
+    <Tag className={cx('rounded-panel border border-ink bg-sheet', className)}>
       {(title || aside) && (
-        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-rule px-5 py-3">
-          {title && <h2 className="text-[0.9375rem] font-bold tracking-[-0.01em]">{title}</h2>}
+        <header className="flex flex-wrap items-center justify-between gap-2 border-b border-ink px-5 py-2.5">
+          {title && <h2 className="font-mono text-[0.8125rem] font-medium tracking-[-0.01em]">{title}</h2>}
           {aside}
         </header>
       )}
@@ -137,7 +137,7 @@ function FieldShell({ id, label, hint, required, children }: FieldShellProps) {
 }
 
 const CONTROL =
-  'w-full rounded-ctl border border-rule-strong bg-sheet px-3 text-sm text-ink placeholder:text-ink-3 transition-colors hover:border-ink-3 focus:border-pen focus:outline-none focus:ring-2 focus:ring-pen/20 disabled:opacity-60';
+  'w-full rounded-ctl border border-ink/60 bg-sheet px-3 text-[0.9375rem] text-ink placeholder:text-ink-3 transition-colors hover:border-ink focus:border-pen focus:outline-none focus:ring-2 focus:ring-pen/25 disabled:opacity-60';
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & { label?: string; hint?: string };
 
@@ -324,8 +324,8 @@ export function Tabs<T extends string>({
   label: string;
 }) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b border-rule">
-      {items.map((item) => {
+    <div role="tablist" aria-label={label} className="flex gap-1 overflow-x-auto border-b border-ink">
+      {items.map((item, i) => {
         const active = item.value === value;
         return (
           <button
@@ -336,10 +336,12 @@ export function Tabs<T extends string>({
             onClick={() => onChange(item.value)}
             className={cx(
               '-mb-px flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-3 text-[0.9375rem] font-semibold transition-colors',
-              active ? 'border-pen text-ink' : 'border-transparent text-ink-3 hover:text-ink',
+              active ? 'border-pen text-ink' : 'border-transparent text-ink-2 hover:text-ink',
             )}
           >
-            {item.icon}
+            <span aria-hidden className="font-mono text-[0.75rem] font-normal opacity-60">
+              ({i + 1})
+            </span>
             {item.label}
             {item.count !== undefined && <span className="code text-ink-3">{item.count}</span>}
           </button>
@@ -355,8 +357,8 @@ export function PageHeader({ title, lede, actions }: { title: string; lede?: str
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="max-w-2xl">
-        <h1 className="display text-[2.5rem] leading-[0.95]">{title}</h1>
-        {lede && <p className="mt-1 text-ink-2">{lede}</p>}
+        <h1 className="display text-[2.75rem] uppercase leading-[0.9] sm:text-[3.5rem]">{title}</h1>
+        {lede && <p className="mt-2 font-mono text-[0.8125rem] text-ink-2">{lede}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

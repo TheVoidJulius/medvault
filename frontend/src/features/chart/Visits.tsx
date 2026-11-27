@@ -41,7 +41,7 @@ function VisitDetail({ visit, onEdit }: { visit: Visit; onEdit: () => void }) {
   const [section, setSection] = useState<Section>(first);
 
   return (
-    <div className="border-t border-rule bg-paper/40">
+    <div className="border-t border-ink bg-paper/50">
       <div className="flex flex-wrap items-center justify-between gap-2 px-4 pt-3">
         <div role="tablist" aria-label="Visit details" className="flex flex-wrap gap-1">
           {sections.map((s) => (
@@ -227,7 +227,7 @@ function VisitRow({
   const abnormal = visit.test_results.filter((t) => t.flag !== 'Normal').length;
 
   return (
-    <li ref={ref} className={cx('overflow-hidden rounded-panel border bg-sheet', highlighted ? 'border-pen shadow-[0_0_0_3px_rgb(var(--pen)/0.15)]' : 'border-rule')}>
+    <li ref={ref} className={cx('overflow-hidden border bg-sheet', highlighted ? 'border-pen shadow-[0_0_0_2px_rgb(var(--pen)/0.35)]' : 'border-ink')}>
       <button
         type="button"
         onClick={onToggle}
@@ -326,9 +326,11 @@ export function Visits({
         </Button>
       </div>
 
-      <p className="text-[0.875rem] text-ink-3">
-        {visits.length === patient.visits.length ? `${visits.length} visits, newest first.` : `${visits.length} of ${patient.visits.length} visits match.`} Click a visit to see its details.
-      </p>
+      {visits.length !== patient.visits.length && (
+        <p className="font-mono text-[0.75rem] text-ink-2">
+          {visits.length} of {patient.visits.length} visits match
+        </p>
+      )}
 
       {visits.length === 0 ? (
         <Empty

@@ -18,11 +18,10 @@ export function Medicines({ patient, onOpenVisit }: { patient: PatientDetail; on
         <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-3" aria-hidden />
         <Input aria-label="Search medicines" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search a medicine, e.g. heparin" className="pl-9" />
       </div>
-      <p className="text-[0.875rem] text-ink-3">{groups.length} different medicines, most recently ordered first.</p>
 
-      <div className="overflow-x-auto rounded-panel border border-rule bg-sheet">
+      <div className="overflow-x-auto border border-ink bg-sheet">
         <table className="nums w-full text-left text-[0.9375rem]">
-          <thead className="border-b border-rule text-[0.8125rem] text-ink-3">
+          <thead className="border-b border-ink font-mono text-[0.75rem] text-ink-2">
             <tr>
               <th className="px-4 py-2.5 font-medium">Medicine</th>
               <th className="px-3 py-2.5 font-medium">Last dose and how often</th>

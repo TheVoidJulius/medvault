@@ -47,18 +47,15 @@ export function Labs({ patient, onOpenVisit }: { patient: PatientDetail; onOpenV
           <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-3" aria-hidden />
           <Input aria-label="Search lab tests" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search a test, e.g. creatinine" className="pl-9" />
         </div>
-        <label className="flex h-10 cursor-pointer items-center gap-2 rounded-ctl border border-rule-strong bg-sheet px-3 text-[0.9375rem]">
+        <label className="flex h-10 cursor-pointer items-center gap-2 border border-ink/60 bg-sheet px-3 text-[0.9375rem]">
           <input type="checkbox" checked={onlyFlagged} onChange={(e) => setOnlyFlagged(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--pen))]" />
           Only out of range ({flaggedCount})
         </label>
       </div>
-      <p className="text-[0.875rem] text-ink-3">
-        {groups.length} tests across {patient.visits.length} visits. Tests whose latest result is out of range come first. Click a test for its full history.
-      </p>
 
-      <div className="overflow-x-auto rounded-panel border border-rule bg-sheet">
+      <div className="overflow-x-auto border border-ink bg-sheet">
         <table className="nums w-full text-left text-[0.9375rem]">
-          <thead className="border-b border-rule text-[0.8125rem] text-ink-3">
+          <thead className="border-b border-ink font-mono text-[0.75rem] text-ink-2">
             <tr>
               <th className="px-4 py-2.5 font-medium">Test</th>
               <th className="px-3 py-2.5 font-medium">Latest result</th>

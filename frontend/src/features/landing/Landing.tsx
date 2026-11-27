@@ -166,10 +166,10 @@ export function Landing({ onSignIn }: { onSignIn: () => void }) {
       stage.current = {
         white: seg(prog, 0.28, 0.5),
         // Step 3: the heart shrinks and settles into the chest of the torso
-        scale: (wide ? 1.18 : 1) * (1 - 0.7 * seg(prog, 0.62, 0.86)),
+        scale: (wide ? 1.02 : 0.9) * (1 - 0.66 * seg(prog, 0.62, 0.86)),
         x: 0.035 * seg(prog, 0.62, 0.86),
         y: 0.13 * seg(prog, 0.62, 0.86),
-        spin: prog * Math.PI * 2.2,
+        spin: prog * Math.PI * 0.7,
       };
     };
     onScroll();
@@ -205,7 +205,7 @@ export function Landing({ onSignIn }: { onSignIn: () => void }) {
   return (
     <div className="landing relative min-h-screen bg-[#B4B7BD] text-[#111317] [--ink:17_19_23] [--pen:31_53_198]">
       <div
-        className="pointer-events-none fixed inset-0 z-0 opacity-[0.16] mix-blend-multiply"
+        className="pointer-events-none fixed inset-0 z-20 opacity-[0.14] mix-blend-multiply"
         aria-hidden
         style={{
           backgroundImage:

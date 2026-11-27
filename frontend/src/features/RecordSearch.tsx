@@ -74,7 +74,7 @@ export function QueryPanel({ scopePatient, initialQuery, showScope = false }: { 
 
   return (
     <div className="space-y-5">
-      <form onSubmit={submit} className="rounded-panel border border-rule bg-sheet focus-within:border-pen focus-within:ring-2 focus-within:ring-pen/15">
+      <form onSubmit={submit} className="border border-ink bg-sheet focus-within:border-pen focus-within:ring-2 focus-within:ring-pen/20">
         <textarea
           ref={inputRef}
           aria-label="Question about the records"
@@ -101,8 +101,7 @@ export function QueryPanel({ scopePatient, initialQuery, showScope = false }: { 
               ))}
             </Select>
           )}
-          <span className="text-2xs text-ink-3">Answers only cite stored rows. If nothing matches, it says so.</span>
-          <Button type="submit" tone="ink" size="sm" loading={loading} className="ml-auto" icon={!loading ? <CornerDownLeft className="h-3.5 w-3.5" /> : undefined}>
+                    <Button type="submit" tone="ink" size="sm" loading={loading} className="ml-auto" icon={!loading ? <CornerDownLeft className="h-3.5 w-3.5" /> : undefined}>
             Ask
           </Button>
         </div>
@@ -150,7 +149,7 @@ export function QueryPanel({ scopePatient, initialQuery, showScope = false }: { 
             />
           ) : (
             <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
-              <section className="self-start rounded-panel border border-rule bg-sheet p-4 lg:sticky lg:top-24">
+              <section className="self-start border border-ink bg-sheet p-4 lg:sticky lg:top-24">
                 <h2 className="text-[0.875rem] font-bold">Answer</h2>
                 <p className="mt-1 text-[0.9375rem] leading-relaxed">{result.direct_summary}</p>
                 <ul className="mt-3 space-y-2 border-t border-rule pt-3">
@@ -168,7 +167,7 @@ export function QueryPanel({ scopePatient, initialQuery, showScope = false }: { 
                 <h2 className="mb-2 text-[0.875rem] font-bold">Source records ({result.retrieved_records.length})</h2>
                 <ul className="space-y-2">
                   {result.retrieved_records.map((r) => (
-                    <li key={r.citation_tag} className="rounded-panel border border-rule bg-sheet px-4 py-3">
+                    <li key={r.citation_tag} className="border border-ink bg-sheet px-4 py-3">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="code text-pen">{r.citation_tag}</span>
                         <Tag tone="outline">{RECORD_LABEL[r.record_type] ?? r.record_type}</Tag>
@@ -204,7 +203,7 @@ export function QueryPanel({ scopePatient, initialQuery, showScope = false }: { 
 export function RecordSearch({ initialQuery }: { initialQuery?: string }) {
   return (
     <div className="space-y-5">
-      <PageHeader title="Ask the records" lede="Ask in plain English across every patient, or pick one. Each answer links to the rows it was built from." />
+      <PageHeader title="Ask the records" />
       <QueryPanel initialQuery={initialQuery} showScope />
     </div>
   );

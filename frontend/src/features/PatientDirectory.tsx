@@ -52,7 +52,6 @@ export function PatientDirectory() {
     <div className="space-y-5">
       <PageHeader
         title="Patients"
-        lede={`${patients.length} patients. Search by name, MRN, condition or allergy.`}
         actions={
           <Button tone="pen" onClick={openRegister} icon={<UserPlus className="h-4 w-4" />}>
             Register patient
@@ -60,7 +59,7 @@ export function PatientDirectory() {
         }
       />
 
-      <div className="grid gap-3 rounded-panel border border-rule bg-sheet p-3 md:grid-cols-[1fr_auto_auto_auto]">
+      <div className="grid gap-3 border border-ink bg-sheet p-3 md:grid-cols-[1fr_auto_auto_auto]">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-ink-3" aria-hidden />
           <Input
@@ -122,9 +121,9 @@ export function PatientDirectory() {
           }
         />
       ) : (
-        <div className="overflow-hidden rounded-panel border border-rule bg-sheet">
+        <div className="overflow-hidden border border-ink bg-sheet">
           <table className="w-full text-left text-[0.8125rem]">
-            <thead className="border-b border-rule text-ink-3">
+            <thead className="border-b border-ink font-mono text-[0.75rem] text-ink-2">
               <tr>
                 <th className="px-5 py-2.5 font-medium">Patient</th>
                 <th className="hidden px-3 py-2.5 font-medium sm:table-cell" title="Age at the most recent visit">Age, sex</th>

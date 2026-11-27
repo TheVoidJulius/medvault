@@ -78,7 +78,7 @@ export function CommandPalette({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center bg-ink/40 px-4 pt-[12vh] backdrop-blur-[2px]" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div role="dialog" aria-modal="true" aria-label="Command palette" className="w-full max-w-xl overflow-hidden rounded-panel border border-rule bg-sheet shadow-float animate-rise">
+      <div role="dialog" aria-modal="true" aria-label="Command palette" className="w-full max-w-xl overflow-hidden border border-ink bg-sheet shadow-float animate-rise">
         <div className="flex items-center gap-3 border-b border-rule px-4">
           <Search className="h-4 w-4 text-ink-3" aria-hidden />
           <input
